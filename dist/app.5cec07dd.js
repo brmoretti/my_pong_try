@@ -83621,7 +83621,7 @@ _a = Board;
 Board.width = 624;
 Board.height = 351;
 Board.backBorder = _a.width / 50;
-},{}],"src/APaddle.ts":[function(require,module,exports) {
+},{}],"src/Paddle.ts":[function(require,module,exports) {
 "use strict";
 
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
@@ -83633,28 +83633,29 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.APaddle = void 0;
+exports.Paddle = void 0;
 var Board_1 = require("./Board");
-var APaddle = /*#__PURE__*/function () {
-  function APaddle(x, y) {
-    _classCallCheck(this, APaddle);
+var Paddle = /*#__PURE__*/function () {
+  function Paddle(x, y) {
+    _classCallCheck(this, Paddle);
+    this.currentSpeed = 0;
     this.isDown = false;
     this.isUp = false;
     this.x = x;
-    this.y = y - APaddle.height / 2;
+    this.y = y - Paddle.height / 2;
   }
-  return _createClass(APaddle, [{
+  return _createClass(Paddle, [{
     key: "up",
     value: function up() {
       if (this.y >= 0) {
-        this.y -= Board_1.Board.height / 100;
+        this.y -= Paddle.speed;
       }
     }
   }, {
     key: "down",
     value: function down() {
-      if (this.y + APaddle.height <= Board_1.Board.height) {
-        this.y += Board_1.Board.height / 100;
+      if (this.y + Paddle.height <= Board_1.Board.height) {
+        this.y += Paddle.speed;
       }
     }
   }, {
@@ -83662,45 +83663,20 @@ var APaddle = /*#__PURE__*/function () {
     value: function update() {
       if (this.isUp) {
         this.up();
+        this.currentSpeed = -Paddle.speed;
       } else if (this.isDown) {
         this.down();
+        this.currentSpeed = Paddle.speed;
+      } else {
+        this.currentSpeed = 0;
       }
-    }
-  }, {
-    key: "_isSideBySideWith",
-    value: function _isSideBySideWith(ball) {
-      return ball.x > this.x && ball.x < this.x + APaddle.width;
-    }
-  }, {
-    key: "topTouched",
-    value: function topTouched(ball) {
-      return this._isSideBySideWith(ball) && this._isAtHeightofTop(ball);
-    }
-  }, {
-    key: "bottonTouched",
-    value: function bottonTouched(ball) {
-      return this._isSideBySideWith(ball) && this._isAtHeightofBotton(ball);
-    }
-  }, {
-    key: "_isAtSameHeightOf",
-    value: function _isAtSameHeightOf(ball) {
-      return ball.y >= this.y && ball.y <= this.y + APaddle.height;
-    }
-  }, {
-    key: "_isAtHeightofTop",
-    value: function _isAtHeightofTop(ball) {
-      return ball.y + ball.radius >= this.y && ball.y - ball.radius < this.y;
-    }
-  }, {
-    key: "_isAtHeightofBotton",
-    value: function _isAtHeightofBotton(ball) {
-      return ball.y - ball.radius <= this.y + APaddle.height && ball.y + ball.radius > this.y + APaddle.height;
     }
   }]);
 }();
-exports.APaddle = APaddle;
-APaddle.height = Board_1.Board.height / 4;
-APaddle.width = Board_1.Board.width / 5;
+exports.Paddle = Paddle;
+Paddle.height = Board_1.Board.height / 4;
+Paddle.width = Board_1.Board.width / 50;
+Paddle.speed = Board_1.Board.height / 100;
 },{"./Board":"src/Board.ts"}],"src/Ball.ts":[function(require,module,exports) {
 "use strict";
 
@@ -83713,13 +83689,20 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Ball = void 0;
+exports.Ball = exports.Side = void 0;
 var Board_1 = require("./Board");
+var Side;
+(function (Side) {
+  Side[Side["Left"] = 0] = "Left";
+  Side[Side["Right"] = 1] = "Right";
+})(Side || (exports.Side = Side = {}));
 var Ball = /*#__PURE__*/function () {
   function Ball(side) {
     _classCallCheck(this, Ball);
     this.radius = Math.min(Board_1.Board.width, Board_1.Board.height) / 50;
-    this.startSpeed = Math.sqrt(Math.pow(Board_1.Board.height, 2) + Math.pow(Board_1.Board.width, 2)) / 200;
+    this.startSpeed = Math.sqrt(Math.pow(Board_1.Board.height, 2) + Math.pow(Board_1.Board.width, 2)) / 100;
+    this.xAcceleration = 1.03;
+    this.drag = 0.3;
     this.x = 0;
     this.y = 0;
     this.ySpeed = 0;
@@ -83733,20 +83716,19 @@ var Ball = /*#__PURE__*/function () {
       this.y = Board_1.Board.height / 2;
       this.xSpeed = this.randomBetween(0.3 * this.startSpeed, 0.9 * this.startSpeed);
       this.ySpeed = Math.sqrt(Math.pow(this.startSpeed, 2) - Math.pow(this.xSpeed, 2));
-      this.xSpeed *= side ? 1 : -1;
+      this.xSpeed *= side === Side.Right ? 1 : -1;
       this.ySpeed *= Math.random() < 0.5 ? -1 : 1;
     }
   }, {
     key: "update",
     value: function update() {
-      if (this.y - this.radius <= 0 || this.y + this.radius >= Board_1.Board.height) {
-        this.ySpeed *= -1;
-      }
+      this.collisionFromBottonToTop(0);
+      this.collisionFromTopToBotton(Board_1.Board.height);
       if (this.x - this.radius <= 0) {
-        this.reset(true);
+        this.reset(Side.Left);
         return;
       } else if (this.x + this.radius >= Board_1.Board.width) {
-        this.reset(false);
+        this.reset(Side.Right);
         return;
       }
       this.x += this.xSpeed;
@@ -83755,7 +83737,7 @@ var Ball = /*#__PURE__*/function () {
   }, {
     key: "invertXSpeed",
     value: function invertXSpeed() {
-      this.xSpeed *= -1;
+      this.xSpeed *= -1 * this.xAcceleration;
     }
   }, {
     key: "invertYSpeed",
@@ -83768,6 +83750,63 @@ var Ball = /*#__PURE__*/function () {
       this.y = newY;
     }
   }, {
+    key: "collisionFromBottonToTop",
+    value: function collisionFromBottonToTop(y_level) {
+      if (this.ySpeed <= 0 && this.y - this.radius <= y_level) {
+        this.y = y_level + this.radius;
+        this.invertYSpeed();
+        return true;
+      }
+      return false;
+    }
+  }, {
+    key: "collisionFromTopToBotton",
+    value: function collisionFromTopToBotton(y_level) {
+      if (this.ySpeed >= 0 && this.y + this.radius >= y_level) {
+        this.y = y_level - this.radius;
+        this.invertYSpeed();
+        return true;
+      }
+      return false;
+    }
+  }, {
+    key: "collisionFromRightToLeft",
+    value: function collisionFromRightToLeft(x_level) {
+      if (this.xSpeed <= 0 && this.x - this.radius <= x_level) {
+        this.x = x_level + this.radius + this.xSpeed;
+        this.invertXSpeed();
+        return true;
+      }
+      return false;
+    }
+  }, {
+    key: "collisionFromLeftToRight",
+    value: function collisionFromLeftToRight(x_level) {
+      if (this.xSpeed >= 0 && this.x + this.radius >= x_level) {
+        this.x = x_level - this.radius;
+        this.invertXSpeed();
+        return true;
+      }
+      return false;
+    }
+  }, {
+    key: "isInFrontOf",
+    value: function isInFrontOf(lower_y, higher_y) {
+      return this.y >= higher_y && this.y <= lower_y;
+    }
+  }, {
+    key: "isOnTheSideOf",
+    value: function isOnTheSideOf(leftmost_x, rightmost_x) {
+      return this.x >= leftmost_x && this.x <= rightmost_x;
+    }
+  }, {
+    key: "ballDrag",
+    value: function ballDrag(yDrag) {
+      if (yDrag != 0) {
+        this.ySpeed = this.ySpeed * (1 - this.drag) + yDrag * this.drag;
+      }
+    }
+  }, {
     key: "randomBetween",
     value: function randomBetween(min, max) {
       return Math.random() * (max - min) + min;
@@ -83775,77 +83814,7 @@ var Ball = /*#__PURE__*/function () {
   }]);
 }();
 exports.Ball = Ball;
-},{"./Board":"src/Board.ts"}],"src/LeftPlayer.ts":[function(require,module,exports) {
-"use strict";
-
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
-function _assertThisInitialized(e) { if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); return e; }
-function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
-function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
-function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.LeftPlayer = void 0;
-var APaddle_1 = require("./APaddle");
-var LeftPlayer = /*#__PURE__*/function (_APaddle_1$APaddle) {
-  function LeftPlayer() {
-    _classCallCheck(this, LeftPlayer);
-    return _callSuper(this, LeftPlayer, arguments);
-  }
-  _inherits(LeftPlayer, _APaddle_1$APaddle);
-  return _createClass(LeftPlayer, [{
-    key: "faceTouched",
-    value: function faceTouched(ball) {
-      return this._isAtSameHeightOf(ball) && ball.x - ball.radius <= this.x + APaddle_1.APaddle.width && ball.x > this.x;
-    }
-  }]);
-}(APaddle_1.APaddle);
-exports.LeftPlayer = LeftPlayer;
-},{"./APaddle":"src/APaddle.ts"}],"src/RightPlayer.ts":[function(require,module,exports) {
-"use strict";
-
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
-function _assertThisInitialized(e) { if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); return e; }
-function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
-function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
-function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.RightPlayer = void 0;
-var APaddle_1 = require("./APaddle");
-var RightPlayer = /*#__PURE__*/function (_APaddle_1$APaddle) {
-  function RightPlayer() {
-    _classCallCheck(this, RightPlayer);
-    return _callSuper(this, RightPlayer, arguments);
-  }
-  _inherits(RightPlayer, _APaddle_1$APaddle);
-  return _createClass(RightPlayer, [{
-    key: "faceTouched",
-    value: function faceTouched(ball) {
-      return this._isAtSameHeightOf(ball) && ball.x + ball.radius >= this.x && ball.x < this.x + APaddle_1.APaddle.width;
-    }
-  }]);
-}(APaddle_1.APaddle);
-exports.RightPlayer = RightPlayer;
-},{"./APaddle":"src/APaddle.ts"}],"src/app.ts":[function(require,module,exports) {
+},{"./Board":"src/Board.ts"}],"src/app.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -83859,11 +83828,10 @@ Object.defineProperty(exports, "__esModule", {
 var p5_1 = __importDefault(require("p5"));
 require("p5/lib/addons/p5.dom");
 require("./styles.scss");
-var APaddle_1 = require("./APaddle");
+var Paddle_1 = require("./Paddle");
 var Board_1 = require("./Board");
 var Ball_1 = require("./Ball");
-var LeftPlayer_1 = require("./LeftPlayer");
-var RightPlayer_1 = require("./RightPlayer");
+var Ball_2 = require("./Ball");
 var sketch = function sketch(p) {
   var player1;
   var player2;
@@ -83871,13 +83839,14 @@ var sketch = function sketch(p) {
   p.setup = function () {
     var canvas = p.createCanvas(Board_1.Board.width, Board_1.Board.height);
     canvas.parent('app');
-    player1 = new LeftPlayer_1.LeftPlayer(Board_1.Board.backBorder, p.height / 2);
-    player2 = new RightPlayer_1.RightPlayer(Board_1.Board.width - Board_1.Board.backBorder - APaddle_1.APaddle.width, p.height / 2);
-    ball = new Ball_1.Ball(false);
+    player1 = new Paddle_1.Paddle(Board_1.Board.backBorder, p.height / 2);
+    player2 = new Paddle_1.Paddle(Board_1.Board.width - Board_1.Board.backBorder - Paddle_1.Paddle.width, p.height / 2);
+    ball = new Ball_1.Ball(Ball_2.Side.Left);
   };
   p.draw = function () {
     p.clear();
     p.background(0);
+    displayCenterLine();
     displayPaddle(player1);
     displayPaddle(player2);
     displayBall(ball);
@@ -83907,7 +83876,6 @@ var sketch = function sketch(p) {
           player2.isUp = true;
           break;
         }
-        z;
       case p.DOWN_ARROW:
         {
           player2.isDown = true;
@@ -83944,22 +83912,30 @@ var sketch = function sketch(p) {
     }
   };
   function displayPaddle(paddle) {
-    p.rect(paddle.x, paddle.y, APaddle_1.APaddle.width, APaddle_1.APaddle.height);
+    p.stroke(255);
+    p.rect(paddle.x, paddle.y, Paddle_1.Paddle.width, Paddle_1.Paddle.height);
   }
   function displayBall(ball) {
+    p.stroke(255);
     p.circle(ball.x, ball.y, 2 * ball.radius);
   }
+  function displayCenterLine() {
+    p.stroke(255);
+    p.line(Board_1.Board.width / 2, 0, p.width / 2, Board_1.Board.height);
+  }
   function handleCollision(player1, player2, ball) {
-    if (player1.faceTouched(ball) || player2.faceTouched(ball)) {
-      ball.invertXSpeed();
-    } else if (player1.topTouched(ball)) {
-      ball.setY(player1.y - ball.radius);
-      ball.invertYSpeed;
+    if (ball.isInFrontOf(player1.y + Paddle_1.Paddle.height, player1.y) && ball.collisionFromRightToLeft(player1.x + Paddle_1.Paddle.width)) {
+      ball.ballDrag(player1.currentSpeed);
+      return;
+    }
+    if (ball.isInFrontOf(player2.y + Paddle_1.Paddle.height, player2.y) && ball.collisionFromLeftToRight(player2.x)) {
+      ball.ballDrag(player2.currentSpeed);
+      return;
     }
   }
 };
 new p5_1.default(sketch, document.getElementById('app'));
-},{"p5":"node_modules/p5/lib/p5.js","p5/lib/addons/p5.dom":"node_modules/p5/lib/addons/p5.dom.js","./styles.scss":"src/styles.scss","./APaddle":"src/APaddle.ts","./Board":"src/Board.ts","./Ball":"src/Ball.ts","./LeftPlayer":"src/LeftPlayer.ts","./RightPlayer":"src/RightPlayer.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"p5":"node_modules/p5/lib/p5.js","p5/lib/addons/p5.dom":"node_modules/p5/lib/addons/p5.dom.js","./styles.scss":"src/styles.scss","./Paddle":"src/Paddle.ts","./Board":"src/Board.ts","./Ball":"src/Ball.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
