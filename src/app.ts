@@ -23,13 +23,15 @@ const sketch = (p: p5) => {
 		p.clear();
 		p.background(0);
 		displayCenterLine();
+		displayScore(player1, Side.Left);
+		displayScore(player2, Side.Right);
 		displayPaddle(player1);
 		displayPaddle(player2);
 		displayBall(ball);
 		handleCollision(player1, player2, ball);
 		player1.update();
 		player2.update();
-		ball.update();
+		ball.update(player1, player2);
 	};
 
 	p.keyPressed = () => {
@@ -83,18 +85,43 @@ const sketch = (p: p5) => {
 	}
 
 	function displayPaddle(paddle: Paddle) {
-		p.stroke(255);
+		p.stroke(0);
+		p.fill(255);
 		p.rect(paddle.x, paddle.y, Paddle.width, Paddle.height)
 	}
 
 	function displayBall(ball: Ball) {
-		p.stroke(255);
+		p.stroke(0);
+		p.fill(255);
 		p.circle(ball.x, ball.y, 2 * ball.radius);
 	}
 
 	function displayCenterLine() {
-		p.stroke(255);
+		p.stroke(100);
+		p.fill(255);
 		p.line(Board.width / 2, 0, p.width / 2, Board.height);
+	}
+
+	function displayScore(player: Paddle, side: Side) {
+		p.stroke(100);
+		p.fill(100);
+		const t_size: number = Board.diag / 10;
+		p.textSize(t_size);
+		const x_pos: number = - t_size / 4 + Board.width / 4;
+		if (side === Side.Left) {
+			p.text(player.currentScore, x_pos, Board.height / 4);
+		} else if (side === Side.Right) {
+			p.text(player.currentScore, Board.width / 2 + x_pos, Board.height / 4);
+		}
+	}
+
+	function displayElements(player1: Paddle, player2: Paddle, ball: Ball) {
+		displayCenterLine();
+		displayScore(player1, Side.Left);
+		displayScore(player2, Side.Right);
+		displayPaddle(player1);
+		displayPaddle(player2);
+		displayBall(ball);
 	}
 
 	function handleCollision(player1: Paddle, player2: Paddle, ball: Ball) {

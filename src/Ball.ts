@@ -1,4 +1,5 @@
 import { Board } from "./Board"
+import { Paddle } from "./Paddle";
 
 export enum Side {
 	Left,
@@ -7,7 +8,7 @@ export enum Side {
 
 export class Ball {
 	readonly radius: number = Math.min(Board.width, Board.height) / 50;
-	readonly startSpeed: number = Math.sqrt(Board.height ** 2 + Board.width ** 2) / 100;
+	readonly startSpeed: number = Board.diag / 150;
 	readonly xAcceleration: number = 1.03;
 	readonly drag: number = 0.3;
 	x: number;
@@ -26,21 +27,23 @@ export class Ball {
 	reset(side: Side) {
 		this.x = Board.width / 2;
 		this.y = Board.height / 2;
-		this.xSpeed = this.randomBetween(0.3 * this.startSpeed, 0.9 * this.startSpeed);
+		this.xSpeed = this.randomBetween(0.4 * this.startSpeed, 0.8 * this.startSpeed);
 		this.ySpeed = Math.sqrt(this.startSpeed ** 2 - this.xSpeed ** 2);
 		this.xSpeed *= side === Side.Right ? 1 : -1;
 		this.ySpeed *= Math.random() < 0.5 ? -1 : 1;
 	}
 
-	update() {
+	update(player1: Paddle, player2: Paddle) {
 		this.collisionFromBottonToTop(0);
 		this.collisionFromTopToBotton(Board.height);
 
 		if (this.x - this.radius <= 0) {
 			this.reset(Side.Left);
+			player2.scoreUp();
 			return;
 		} else if (this.x + this.radius >= Board.width) {
 			this.reset(Side.Right);
+			player1.scoreUp();
 			return;
 		}
 
@@ -98,10 +101,6 @@ export class Ball {
 
 	isInFrontOf(lower_y: number, higher_y: number): boolean {
 		return this.y >= higher_y && this.y <= lower_y;
-	}
-
-	isOnTheSideOf(leftmost_x: number, rightmost_x: number): boolean {
-		return this.x >= leftmost_x && this.x <= rightmost_x;
 	}
 
 	ballDrag(yDrag: number) {

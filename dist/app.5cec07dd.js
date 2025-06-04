@@ -83621,6 +83621,7 @@ _a = Board;
 Board.width = 624;
 Board.height = 351;
 Board.backBorder = _a.width / 50;
+Board.diag = Math.sqrt(Math.pow(_a.width, 2) + Math.pow(_a.height, 2));
 },{}],"src/Paddle.ts":[function(require,module,exports) {
 "use strict";
 
@@ -83638,9 +83639,10 @@ var Board_1 = require("./Board");
 var Paddle = /*#__PURE__*/function () {
   function Paddle(x, y) {
     _classCallCheck(this, Paddle);
-    this.currentSpeed = 0;
     this.isDown = false;
     this.isUp = false;
+    this.speed = 0;
+    this.score = 0;
     this.x = x;
     this.y = y - Paddle.height / 2;
   }
@@ -83648,14 +83650,16 @@ var Paddle = /*#__PURE__*/function () {
     key: "up",
     value: function up() {
       if (this.y >= 0) {
-        this.y -= Paddle.speed;
+        this.y -= Paddle.baseSpeed;
+        this.speed = -Paddle.baseSpeed;
       }
     }
   }, {
     key: "down",
     value: function down() {
       if (this.y + Paddle.height <= Board_1.Board.height) {
-        this.y += Paddle.speed;
+        this.y += Paddle.baseSpeed;
+        this.speed = Paddle.baseSpeed;
       }
     }
   }, {
@@ -83663,20 +83667,33 @@ var Paddle = /*#__PURE__*/function () {
     value: function update() {
       if (this.isUp) {
         this.up();
-        this.currentSpeed = -Paddle.speed;
       } else if (this.isDown) {
         this.down();
-        this.currentSpeed = Paddle.speed;
       } else {
-        this.currentSpeed = 0;
+        this.speed = 0;
       }
+    }
+  }, {
+    key: "scoreUp",
+    value: function scoreUp() {
+      this.score++;
+    }
+  }, {
+    key: "currentScore",
+    get: function get() {
+      return this.score;
+    }
+  }, {
+    key: "currentSpeed",
+    get: function get() {
+      return this.speed;
     }
   }]);
 }();
 exports.Paddle = Paddle;
 Paddle.height = Board_1.Board.height / 4;
 Paddle.width = Board_1.Board.width / 50;
-Paddle.speed = Board_1.Board.height / 100;
+Paddle.baseSpeed = Board_1.Board.height / 100;
 },{"./Board":"src/Board.ts"}],"src/Ball.ts":[function(require,module,exports) {
 "use strict";
 
@@ -83700,7 +83717,7 @@ var Ball = /*#__PURE__*/function () {
   function Ball(side) {
     _classCallCheck(this, Ball);
     this.radius = Math.min(Board_1.Board.width, Board_1.Board.height) / 50;
-    this.startSpeed = Math.sqrt(Math.pow(Board_1.Board.height, 2) + Math.pow(Board_1.Board.width, 2)) / 100;
+    this.startSpeed = Board_1.Board.diag / 150;
     this.xAcceleration = 1.03;
     this.drag = 0.3;
     this.x = 0;
@@ -83714,21 +83731,23 @@ var Ball = /*#__PURE__*/function () {
     value: function reset(side) {
       this.x = Board_1.Board.width / 2;
       this.y = Board_1.Board.height / 2;
-      this.xSpeed = this.randomBetween(0.3 * this.startSpeed, 0.9 * this.startSpeed);
+      this.xSpeed = this.randomBetween(0.4 * this.startSpeed, 0.8 * this.startSpeed);
       this.ySpeed = Math.sqrt(Math.pow(this.startSpeed, 2) - Math.pow(this.xSpeed, 2));
       this.xSpeed *= side === Side.Right ? 1 : -1;
       this.ySpeed *= Math.random() < 0.5 ? -1 : 1;
     }
   }, {
     key: "update",
-    value: function update() {
+    value: function update(player1, player2) {
       this.collisionFromBottonToTop(0);
       this.collisionFromTopToBotton(Board_1.Board.height);
       if (this.x - this.radius <= 0) {
         this.reset(Side.Left);
+        player2.scoreUp();
         return;
       } else if (this.x + this.radius >= Board_1.Board.width) {
         this.reset(Side.Right);
+        player1.scoreUp();
         return;
       }
       this.x += this.xSpeed;
@@ -83795,11 +83814,6 @@ var Ball = /*#__PURE__*/function () {
       return this.y >= higher_y && this.y <= lower_y;
     }
   }, {
-    key: "isOnTheSideOf",
-    value: function isOnTheSideOf(leftmost_x, rightmost_x) {
-      return this.x >= leftmost_x && this.x <= rightmost_x;
-    }
-  }, {
     key: "ballDrag",
     value: function ballDrag(yDrag) {
       if (yDrag != 0) {
@@ -83847,13 +83861,15 @@ var sketch = function sketch(p) {
     p.clear();
     p.background(0);
     displayCenterLine();
+    displayScore(player1, Ball_2.Side.Left);
+    displayScore(player2, Ball_2.Side.Right);
     displayPaddle(player1);
     displayPaddle(player2);
     displayBall(ball);
     handleCollision(player1, player2, ball);
     player1.update();
     player2.update();
-    ball.update();
+    ball.update(player1, player2);
   };
   p.keyPressed = function () {
     switch (p.key) {
@@ -83912,16 +83928,39 @@ var sketch = function sketch(p) {
     }
   };
   function displayPaddle(paddle) {
-    p.stroke(255);
+    p.stroke(0);
+    p.fill(255);
     p.rect(paddle.x, paddle.y, Paddle_1.Paddle.width, Paddle_1.Paddle.height);
   }
   function displayBall(ball) {
-    p.stroke(255);
+    p.stroke(0);
+    p.fill(255);
     p.circle(ball.x, ball.y, 2 * ball.radius);
   }
   function displayCenterLine() {
-    p.stroke(255);
+    p.stroke(100);
+    p.fill(255);
     p.line(Board_1.Board.width / 2, 0, p.width / 2, Board_1.Board.height);
+  }
+  function displayScore(player, side) {
+    p.stroke(100);
+    p.fill(100);
+    var t_size = Board_1.Board.diag / 10;
+    p.textSize(t_size);
+    var x_pos = -t_size / 4 + Board_1.Board.width / 4;
+    if (side === Ball_2.Side.Left) {
+      p.text(player.currentScore, x_pos, Board_1.Board.height / 4);
+    } else if (side === Ball_2.Side.Right) {
+      p.text(player.currentScore, Board_1.Board.width / 2 + x_pos, Board_1.Board.height / 4);
+    }
+  }
+  function displayElements(player1, player2, ball) {
+    displayCenterLine();
+    displayScore(player1, Ball_2.Side.Left);
+    displayScore(player2, Ball_2.Side.Right);
+    displayPaddle(player1);
+    displayPaddle(player2);
+    displayBall(ball);
   }
   function handleCollision(player1, player2, ball) {
     if (ball.isInFrontOf(player1.y + Paddle_1.Paddle.height, player1.y) && ball.collisionFromRightToLeft(player1.x + Paddle_1.Paddle.width)) {
