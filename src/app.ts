@@ -5,11 +5,29 @@ import { Paddle } from './Paddle';
 import { Board } from './Board';
 import { Ball } from './Ball'
 import { Side } from './Ball'
+import fontUrl from './PressStart2P-Regular.ttf';
+
+let retroFont: p5.Font;
 
 const sketch = (p: p5) => {
+	enum GameState {
+		StartScreen,
+		Countdown,
+		Playing,
+		End
+	}
+
+	let gameState: GameState = GameState.StartScreen;
 	let player1: Paddle;
 	let player2: Paddle;
 	let ball: Ball;
+	let countdownStartTime: number = 0;
+	const textSize: number = Board.diag / 10;
+	const countdownDuration = 4000;
+
+	p.preload = () => {
+		retroFont = p.loadFont(fontUrl);
+	};
 
 	p.setup = () => {
 		const canvas = p.createCanvas(Board.width, Board.height);
@@ -22,19 +40,34 @@ const sketch = (p: p5) => {
 	p.draw = () => {
 		p.clear();
 		p.background(0);
-		displayCenterLine();
-		displayScore(player1, Side.Left);
-		displayScore(player2, Side.Right);
-		displayPaddle(player1);
-		displayPaddle(player2);
-		displayBall(ball);
-		handleCollision(player1, player2, ball);
+		if (gameState === GameState.StartScreen) {
+			displayStartScreen();
+			return;
+		}
+		displayGameElements(player1, player2);
+		if (gameState === GameState.Countdown) {
+			displayCountdown();
+		}
 		player1.update();
 		player2.update();
-		ball.update(player1, player2);
+		if (gameState === GameState.Playing) {
+			handleCollision(player1, player2, ball);
+			ball.update(player1, player2);
+			displayBall(ball);
+		}
+		checkScore(player1, player2);
+		if (gameState === GameState.End) {
+			displayWinnerScreen(player1, player2);
+		}
 	};
 
 	p.keyPressed = () => {
+		if (gameState === GameState.StartScreen) {
+			if (p.key === ' ') {
+				gameState = GameState.Countdown;
+				countdownStartTime = p.millis();
+			}
+		}
 		switch (p.key) {
 			case 'a':
 			case 'A': {
@@ -84,30 +117,79 @@ const sketch = (p: p5) => {
 		}
 	}
 
+	function displayStartScreen() {
+		p.textFont(retroFont);
+		p.textAlign(p.CENTER, p.CENTER);
+		p.fill(255);
+		p.textSize(textSize);
+		p.text('PONG', Board.width / 2, Board.height / 2 - textSize / 2);
+		p.textSize(textSize / 3);
+		p.text('Press SPACE to Start', Board.width / 2, Board.height / 2 + textSize / 3);
+	}
+
+	function displayWinnerScreen(player1: Paddle, player2: Paddle) {
+		p.textFont(retroFont);
+		const arrow: string = player1.currentScore > player2.currentScore ? "<---" : "--->";
+		p.textAlign(p.CENTER, p.CENTER);
+		p.fill(255);
+		p.textSize(textSize / 2);
+		p.text(arrow, Board.width / 2, Board.height / 2 - textSize / 2);
+		p.textSize(textSize / 3);
+		p.text('Won the game', Board.width / 2, Board.height / 2 + textSize / 3);
+	}
+
+	function displayCountdown() {
+		p.textFont(retroFont);
+		const elapsed = p.millis() - countdownStartTime;
+		let count = 3 - Math.floor(elapsed / 1000);
+		p.textAlign(p.CENTER, p.CENTER);
+		p.stroke(255);
+		p.fill(255);
+		p.textSize(textSize);
+		if (count > 0) {
+			p.text(count.toString(), Board.width / 2, Board.height / 2);
+		} else if (elapsed < countdownDuration) {
+			p.text('GO!', Board.width / 2, Board.height / 2);
+		} else {
+			gameState = GameState.Playing;
+		}
+		return;
+	}
+
 	function displayPaddle(paddle: Paddle) {
-		p.stroke(0);
+		p.stroke(255);
 		p.fill(255);
 		p.rect(paddle.x, paddle.y, Paddle.width, Paddle.height)
 	}
 
 	function displayBall(ball: Ball) {
-		p.stroke(0);
+		p.stroke(255);
 		p.fill(255);
-		p.circle(ball.x, ball.y, 2 * ball.radius);
+		p.square(ball.x, ball.y, 2 * ball.radius);
 	}
 
 	function displayCenterLine() {
 		p.stroke(100);
+		p.strokeWeight(4);
+		p.strokeCap(p.SQUARE);
 		p.fill(255);
-		p.line(Board.width / 2, 0, p.width / 2, Board.height);
+		const dashLength = Board.height / 500 * 20;
+		const gapLength = Board.height / 500 * 15;
+		const totalSegment = dashLength + gapLength;
+
+		for (let y = 0; y < Board.height; y += totalSegment) {
+			const dashEnd = Math.min(y + dashLength, Board.height);
+			p.line(Board.width / 2, y, Board.width / 2, dashEnd);
+		}
+		p.strokeWeight(1);
 	}
 
 	function displayScore(player: Paddle, side: Side) {
+		p.textFont(retroFont);
 		p.stroke(100);
 		p.fill(100);
-		const t_size: number = Board.diag / 10;
-		p.textSize(t_size);
-		const x_pos: number = - t_size / 4 + Board.width / 4;
+		p.textSize(textSize);
+		const x_pos: number = - textSize / 4 + Board.width / 4;
 		if (side === Side.Left) {
 			p.text(player.currentScore, x_pos, Board.height / 4);
 		} else if (side === Side.Right) {
@@ -115,26 +197,32 @@ const sketch = (p: p5) => {
 		}
 	}
 
-	function displayElements(player1: Paddle, player2: Paddle, ball: Ball) {
-		displayCenterLine();
+	function displayGameElements(player1: Paddle, player2: Paddle) {
+		displayCenterLine()
 		displayScore(player1, Side.Left);
 		displayScore(player2, Side.Right);
 		displayPaddle(player1);
 		displayPaddle(player2);
-		displayBall(ball);
 	}
 
 	function handleCollision(player1: Paddle, player2: Paddle, ball: Ball) {
 		if (ball.isInFrontOf(player1.y + Paddle.height, player1.y) &&
 			ball.collisionFromRightToLeft(player1.x + Paddle.width)) {
-				ball.ballDrag(player1.currentSpeed);
-				return;
-			}
+			ball.ballDrag(player1.currentSpeed);
+			return;
+		}
 		if (ball.isInFrontOf(player2.y + Paddle.height, player2.y) &&
 			ball.collisionFromLeftToRight(player2.x)) {
-				ball.ballDrag(player2.currentSpeed);
-				return;
-			}
+			ball.ballDrag(player2.currentSpeed);
+			return;
+		}
+	}
+
+	function checkScore(player1: Paddle, player2: Paddle) {
+		if (player1.currentScore < 3 && player2.currentScore < 3) return;
+		if (Math.abs(player1.currentScore - player2.currentScore) > 2) {
+			gameState = GameState.End;
+		}
 	}
 };
 

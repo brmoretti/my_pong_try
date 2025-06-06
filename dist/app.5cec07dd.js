@@ -83828,7 +83828,9 @@ var Ball = /*#__PURE__*/function () {
   }]);
 }();
 exports.Ball = Ball;
-},{"./Board":"src/Board.ts"}],"src/app.ts":[function(require,module,exports) {
+},{"./Board":"src/Board.ts"}],"src/PressStart2P-Regular.ttf":[function(require,module,exports) {
+module.exports = "/PressStart2P-Regular.572aab8a.ttf";
+},{}],"src/app.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -83846,10 +83848,26 @@ var Paddle_1 = require("./Paddle");
 var Board_1 = require("./Board");
 var Ball_1 = require("./Ball");
 var Ball_2 = require("./Ball");
+var PressStart2P_Regular_ttf_1 = __importDefault(require("./PressStart2P-Regular.ttf"));
+var retroFont;
 var sketch = function sketch(p) {
+  var GameState;
+  (function (GameState) {
+    GameState[GameState["StartScreen"] = 0] = "StartScreen";
+    GameState[GameState["Countdown"] = 1] = "Countdown";
+    GameState[GameState["Playing"] = 2] = "Playing";
+    GameState[GameState["End"] = 3] = "End";
+  })(GameState || (GameState = {}));
+  var gameState = GameState.StartScreen;
   var player1;
   var player2;
   var ball;
+  var countdownStartTime = 0;
+  var textSize = Board_1.Board.diag / 10;
+  var countdownDuration = 4000;
+  p.preload = function () {
+    retroFont = p.loadFont(PressStart2P_Regular_ttf_1.default);
+  };
   p.setup = function () {
     var canvas = p.createCanvas(Board_1.Board.width, Board_1.Board.height);
     canvas.parent('app');
@@ -83860,18 +83878,33 @@ var sketch = function sketch(p) {
   p.draw = function () {
     p.clear();
     p.background(0);
-    displayCenterLine();
-    displayScore(player1, Ball_2.Side.Left);
-    displayScore(player2, Ball_2.Side.Right);
-    displayPaddle(player1);
-    displayPaddle(player2);
-    displayBall(ball);
-    handleCollision(player1, player2, ball);
+    if (gameState === GameState.StartScreen) {
+      displayStartScreen();
+      return;
+    }
+    displayGameElements(player1, player2);
+    if (gameState === GameState.Countdown) {
+      displayCountdown();
+    }
     player1.update();
     player2.update();
-    ball.update(player1, player2);
+    if (gameState === GameState.Playing) {
+      handleCollision(player1, player2, ball);
+      ball.update(player1, player2);
+      displayBall(ball);
+    }
+    checkScore(player1, player2);
+    if (gameState === GameState.End) {
+      displayWinnerScreen(player1, player2);
+    }
   };
   p.keyPressed = function () {
+    if (gameState === GameState.StartScreen) {
+      if (p.key === ' ') {
+        gameState = GameState.Countdown;
+        countdownStartTime = p.millis();
+      }
+    }
     switch (p.key) {
       case 'a':
       case 'A':
@@ -83927,40 +83960,84 @@ var sketch = function sketch(p) {
         }
     }
   };
+  function displayStartScreen() {
+    p.textFont(retroFont);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.fill(255);
+    p.textSize(textSize);
+    p.text('PONG', Board_1.Board.width / 2, Board_1.Board.height / 2 - textSize / 2);
+    p.textSize(textSize / 3);
+    p.text('Press SPACE to Start', Board_1.Board.width / 2, Board_1.Board.height / 2 + textSize / 3);
+  }
+  function displayWinnerScreen(player1, player2) {
+    p.textFont(retroFont);
+    var arrow = player1.currentScore > player2.currentScore ? "<---" : "--->";
+    p.textAlign(p.CENTER, p.CENTER);
+    p.fill(255);
+    p.textSize(textSize / 2);
+    p.text(arrow, Board_1.Board.width / 2, Board_1.Board.height / 2 - textSize / 2);
+    p.textSize(textSize / 3);
+    p.text('Won the game', Board_1.Board.width / 2, Board_1.Board.height / 2 + textSize / 3);
+  }
+  function displayCountdown() {
+    p.textFont(retroFont);
+    var elapsed = p.millis() - countdownStartTime;
+    var count = 3 - Math.floor(elapsed / 1000);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.stroke(255);
+    p.fill(255);
+    p.textSize(textSize);
+    if (count > 0) {
+      p.text(count.toString(), Board_1.Board.width / 2, Board_1.Board.height / 2);
+    } else if (elapsed < countdownDuration) {
+      p.text('GO!', Board_1.Board.width / 2, Board_1.Board.height / 2);
+    } else {
+      gameState = GameState.Playing;
+    }
+    return;
+  }
   function displayPaddle(paddle) {
-    p.stroke(0);
+    p.stroke(255);
     p.fill(255);
     p.rect(paddle.x, paddle.y, Paddle_1.Paddle.width, Paddle_1.Paddle.height);
   }
   function displayBall(ball) {
-    p.stroke(0);
+    p.stroke(255);
     p.fill(255);
-    p.circle(ball.x, ball.y, 2 * ball.radius);
+    p.square(ball.x, ball.y, 2 * ball.radius);
   }
   function displayCenterLine() {
     p.stroke(100);
+    p.strokeWeight(4);
+    p.strokeCap(p.SQUARE);
     p.fill(255);
-    p.line(Board_1.Board.width / 2, 0, p.width / 2, Board_1.Board.height);
+    var dashLength = Board_1.Board.height / 500 * 20;
+    var gapLength = Board_1.Board.height / 500 * 15;
+    var totalSegment = dashLength + gapLength;
+    for (var y = 0; y < Board_1.Board.height; y += totalSegment) {
+      var dashEnd = Math.min(y + dashLength, Board_1.Board.height);
+      p.line(Board_1.Board.width / 2, y, Board_1.Board.width / 2, dashEnd);
+    }
+    p.strokeWeight(1);
   }
   function displayScore(player, side) {
+    p.textFont(retroFont);
     p.stroke(100);
     p.fill(100);
-    var t_size = Board_1.Board.diag / 10;
-    p.textSize(t_size);
-    var x_pos = -t_size / 4 + Board_1.Board.width / 4;
+    p.textSize(textSize);
+    var x_pos = -textSize / 4 + Board_1.Board.width / 4;
     if (side === Ball_2.Side.Left) {
       p.text(player.currentScore, x_pos, Board_1.Board.height / 4);
     } else if (side === Ball_2.Side.Right) {
       p.text(player.currentScore, Board_1.Board.width / 2 + x_pos, Board_1.Board.height / 4);
     }
   }
-  function displayElements(player1, player2, ball) {
+  function displayGameElements(player1, player2) {
     displayCenterLine();
     displayScore(player1, Ball_2.Side.Left);
     displayScore(player2, Ball_2.Side.Right);
     displayPaddle(player1);
     displayPaddle(player2);
-    displayBall(ball);
   }
   function handleCollision(player1, player2, ball) {
     if (ball.isInFrontOf(player1.y + Paddle_1.Paddle.height, player1.y) && ball.collisionFromRightToLeft(player1.x + Paddle_1.Paddle.width)) {
@@ -83972,9 +84049,15 @@ var sketch = function sketch(p) {
       return;
     }
   }
+  function checkScore(player1, player2) {
+    if (player1.currentScore < 3 && player2.currentScore < 3) return;
+    if (Math.abs(player1.currentScore - player2.currentScore) > 2) {
+      gameState = GameState.End;
+    }
+  }
 };
 new p5_1.default(sketch, document.getElementById('app'));
-},{"p5":"node_modules/p5/lib/p5.js","p5/lib/addons/p5.dom":"node_modules/p5/lib/addons/p5.dom.js","./styles.scss":"src/styles.scss","./Paddle":"src/Paddle.ts","./Board":"src/Board.ts","./Ball":"src/Ball.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"p5":"node_modules/p5/lib/p5.js","p5/lib/addons/p5.dom":"node_modules/p5/lib/addons/p5.dom.js","./styles.scss":"src/styles.scss","./Paddle":"src/Paddle.ts","./Board":"src/Board.ts","./Ball":"src/Ball.ts","./PressStart2P-Regular.ttf":"src/PressStart2P-Regular.ttf"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -83999,7 +84082,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36423" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43137" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
