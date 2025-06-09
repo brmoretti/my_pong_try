@@ -7,6 +7,7 @@ import { Board } from './Board';
 import { Ball } from './Ball'
 import { Side } from './Ball'
 import fontUrl from '../public/PressStart2P-Regular.ttf';
+import { ABall } from './ABall';
 
 let retroFont: p5.Font;
 
@@ -35,7 +36,7 @@ const sketch = (p: p5) => {
 		canvas.parent('app');
 		player1 = new Paddle(Board.backBorder, p.height / 2);
 		player2 = new Paddle(Board.width - Board.backBorder - Paddle.width, p.height / 2);
-		ball = new Ball(Side.Left);
+		ball = new Ball();
 	};
 
 	p.draw = () => {
@@ -166,8 +167,7 @@ const sketch = (p: p5) => {
 	function displayBall(ball: Ball) {
 		p.stroke(255);
 		p.fill(255);
-		p.square(ball.x, ball.y, 2 * ball.radius);
-		// p.circle(ball.x, ball.y, 2 * ball.radius)
+		p.square(ball.x, ball.y, 2 * ABall.radius);
 	}
 
 	function displayCenterLine() {
@@ -208,14 +208,16 @@ const sketch = (p: p5) => {
 	}
 
 	function handleCollision(player1: Paddle, player2: Paddle, ball: Ball) {
+		ball.collisionFromBottonToTop(0);
+		ball.collisionFromTopToBotton(Board.height);
 		if (ball.isInFrontOf(player1.y + Paddle.height, player1.y) &&
 			ball.collisionFromRightToLeft(player1.x + Paddle.width)) {
-			ball.ballDrag(player1.currentSpeed);
+			ball.ballPaddleHit(player1.currentSpeed);
 			return;
 		}
 		if (ball.isInFrontOf(player2.y + Paddle.height, player2.y) &&
 			ball.collisionFromLeftToRight(player2.x)) {
-			ball.ballDrag(player2.currentSpeed);
+			ball.ballPaddleHit(player2.currentSpeed)
 			return;
 		}
 	}
