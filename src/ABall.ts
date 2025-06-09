@@ -1,20 +1,19 @@
 import { Board } from "./Board"
-import { Paddle } from "./Paddle";
 
 export abstract class ABall {
 	static readonly radius: number = Math.min(Board.width, Board.height) / 50;
 	static readonly startSpeed: number = Board.diag / 200;
 	static readonly acceleration: number = 1.02;
 	static readonly drag: number = 0.2;
-	x: number = 0;
-	y: number = 0;
-	protected ySpeed: number = 0;
-	protected xSpeed: number = 0;
+	protected		x: number = 0;
+	protected		y: number = 0;
+	protected		ySpeed: number = 0;
+	protected		xSpeed: number = 0;
 
 	constructor() {
 	}
 
-	abstract update(player1?: Paddle, player2?: Paddle): void;
+	abstract update(): void;
 
 	accelerate() {
 		this.xSpeed *= ABall.acceleration;
@@ -82,4 +81,19 @@ export abstract class ABall {
 		this.ySpeed = Math.max(-maxYSpeed, Math.min(maxYSpeed, this.ySpeed));
 	}
 
+	get currentX(): number {
+		return this.x;
+	}
+
+	get currentY(): number {
+		return this.y;
+	}
+
+	get currentXSpeed(): number {
+		return this.xSpeed;
+	}
+
+	get currentYSpeed(): number {
+		return this.ySpeed;
+	}
 }

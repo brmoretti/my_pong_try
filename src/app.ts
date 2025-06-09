@@ -53,8 +53,9 @@ const sketch = (p: p5) => {
 		player1.update();
 		player2.update();
 		if (gameState === GameState.Playing) {
+			ball.update();
 			handleCollision(player1, player2, ball);
-			ball.update(player1, player2);
+			checkForPoint(player1, player2, ball);
 			displayBall(ball);
 		}
 		checkScore(player1, player2);
@@ -167,7 +168,7 @@ const sketch = (p: p5) => {
 	function displayBall(ball: Ball) {
 		p.stroke(255);
 		p.fill(255);
-		p.square(ball.x, ball.y, 2 * ABall.radius);
+		p.square(ball.currentX, ball.currentY, 2 * ABall.radius);
 	}
 
 	function displayCenterLine() {
@@ -192,10 +193,11 @@ const sketch = (p: p5) => {
 		p.fill(100);
 		p.textSize(textSize);
 		const x_pos: number = - textSize / 4 + Board.width / 4;
+		const y_pos: number = Board.height / 4;
 		if (side === Side.Left) {
-			p.text(player.currentScore, x_pos, Board.height / 4);
+			p.text(player.currentScore, x_pos, y_pos);
 		} else if (side === Side.Right) {
-			p.text(player.currentScore, Board.width / 2 + x_pos, Board.height / 4);
+			p.text(player.currentScore, Board.width / 2 + x_pos, y_pos);
 		}
 	}
 
@@ -219,6 +221,16 @@ const sketch = (p: p5) => {
 			ball.collisionFromLeftToRight(player2.x)) {
 			ball.ballPaddleHit(player2.currentSpeed)
 			return;
+		}
+	}
+
+	function checkForPoint(player1: Paddle, player2: Paddle, ball: Ball) {
+		if (ball.currentX <= 0) {
+			ball.reset(Side.Left);
+			player2.scoreUp();
+		} else if (ball.currentX + 2 * ABall.radius >= Board.width) {
+			ball.reset(Side.Right);
+			player1.scoreUp();
 		}
 	}
 
