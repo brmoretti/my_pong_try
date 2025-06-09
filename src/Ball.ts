@@ -1,10 +1,6 @@
 import { Board } from "./Board";
+import { Side } from "./Board";
 import { ABall } from "./ABall";
-
-export enum Side {
-	Left,
-	Right
-}
 
 export class Ball extends ABall {
 
