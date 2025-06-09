@@ -8,8 +8,8 @@ export enum Side {
 
 export class Ball {
 	readonly radius: number = Math.min(Board.width, Board.height) / 50;
-	readonly startSpeed: number = Board.diag / 150;
-	readonly xAcceleration: number = 1.03;
+	readonly startSpeed: number = Board.diag / 200;
+	readonly xAcceleration: number = 1.05;
 	readonly drag: number = 0.3;
 	x: number;
 	y: number;
@@ -52,10 +52,11 @@ export class Ball {
 	}
 
 	invertXSpeed() {
-		this.xSpeed *= -1 * this.xAcceleration;
+		this.xSpeed *= -this.xAcceleration;
 	}
 
 	invertYSpeed() {
+		this.xSpeed *= this.xAcceleration;
 		this.ySpeed *= -1;
 	}
 
@@ -64,8 +65,8 @@ export class Ball {
 	}
 
 	collisionFromBottonToTop(y_level: number): boolean {
-		if (this.ySpeed <= 0 && this.y - this.radius <= y_level) {
-			this.y = y_level + this.radius;
+		if (this.ySpeed < 0 && this.y <= y_level) {
+			this.y = y_level;
 			this.invertYSpeed();
 			return true;
 		}
@@ -73,8 +74,8 @@ export class Ball {
 	}
 
 	collisionFromTopToBotton(y_level: number): boolean {
-		if (this.ySpeed >= 0 && this.y + this.radius >= y_level) {
-			this.y = y_level - this.radius;
+		if (this.ySpeed > 0 && this.y +  2 * this.radius >= y_level) {
+			this.y = y_level - 2 * this.radius;
 			this.invertYSpeed();
 			return true;
 		}
@@ -82,8 +83,8 @@ export class Ball {
 	}
 
 	collisionFromRightToLeft(x_level: number): boolean {
-		if (this.xSpeed <= 0 && this.x - this.radius <= x_level) {
-			this.x = x_level + this.radius + this.xSpeed;
+		if (this.xSpeed < 0 && this.x <= x_level) {
+			this.x = x_level;
 			this.invertXSpeed();
 			return true;
 		}
@@ -91,8 +92,8 @@ export class Ball {
 	}
 
 	collisionFromLeftToRight(x_level: number): boolean {
-		if (this.xSpeed >= 0 && this.x + this.radius >= x_level) {
-			this.x = x_level - this.radius;
+		if (this.xSpeed > 0 && this.x + 2 * this.radius >= x_level) {
+			this.x = x_level - 2 * this.radius;
 			this.invertXSpeed();
 			return true;
 		}
@@ -100,12 +101,24 @@ export class Ball {
 	}
 
 	isInFrontOf(lower_y: number, higher_y: number): boolean {
-		return this.y >= higher_y && this.y <= lower_y;
+		return this.y + 2 * this.radius >= higher_y && this.y <= lower_y;
 	}
 
 	ballDrag(yDrag: number) {
 		if (yDrag != 0) {
+			const xDirection = Math.sign(this.xSpeed);
+			const absoluteSpeed = Math.sqrt(this.xSpeed ** 2 + this.ySpeed ** 2);
+
 			this.ySpeed = this.ySpeed * (1 - this.drag) + yDrag * this.drag;
+
+			const xSpeedSquared = absoluteSpeed ** 2 - this.ySpeed ** 2;
+
+			if (xSpeedSquared >= 0) {
+				this.xSpeed = Math.sqrt(xSpeedSquared) * xDirection;
+			} else {
+				this.ySpeed = Math.sign(this.ySpeed) * absoluteSpeed * 0.99;
+				this.xSpeed = Math.sqrt(absoluteSpeed ** 2 - this.ySpeed ** 2) * xDirection;
+			}
 		}
 	}
 

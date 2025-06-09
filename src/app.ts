@@ -1,11 +1,12 @@
 import p5 from 'p5';
-import 'p5/lib/addons/p5.dom'
+import 'p5/lib/addons/p5.dom';
+import 'p5/lib/addons/p5.sound'
 import './styles.scss';
 import { Paddle } from './Paddle';
 import { Board } from './Board';
 import { Ball } from './Ball'
 import { Side } from './Ball'
-import fontUrl from './PressStart2P-Regular.ttf';
+import fontUrl from '../public/PressStart2P-Regular.ttf';
 
 let retroFont: p5.Font;
 
@@ -124,7 +125,7 @@ const sketch = (p: p5) => {
 		p.textSize(textSize);
 		p.text('PONG', Board.width / 2, Board.height / 2 - textSize / 2);
 		p.textSize(textSize / 3);
-		p.text('Press SPACE to Start', Board.width / 2, Board.height / 2 + textSize / 3);
+		p.text('Press SPACE to Start!', Board.width / 2, Board.height / 2 + textSize / 3);
 	}
 
 	function displayWinnerScreen(player1: Paddle, player2: Paddle) {
@@ -166,6 +167,7 @@ const sketch = (p: p5) => {
 		p.stroke(255);
 		p.fill(255);
 		p.square(ball.x, ball.y, 2 * ball.radius);
+		// p.circle(ball.x, ball.y, 2 * ball.radius)
 	}
 
 	function displayCenterLine() {
@@ -220,7 +222,7 @@ const sketch = (p: p5) => {
 
 	function checkScore(player1: Paddle, player2: Paddle) {
 		if (player1.currentScore < 3 && player2.currentScore < 3) return;
-		if (Math.abs(player1.currentScore - player2.currentScore) > 2) {
+		if (Math.abs(player1.currentScore - player2.currentScore) >= 2) {
 			gameState = GameState.End;
 		}
 	}
