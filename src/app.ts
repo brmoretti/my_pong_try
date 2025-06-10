@@ -29,6 +29,13 @@ const sketch = (p: p5) => {
 	let countdownStartTime: number = 0;
 	const countdownDuration = 4000;
 
+	//AI variables
+	let ai: AI;
+	let aiUpdateTimer: number = 0;
+	let currentTime: number
+	const AI_UPDATE_INTERVAL = 1000;
+
+
 	p.preload = () => {
 		retroFont = p.loadFont(fontUrl);
 	};
@@ -39,6 +46,8 @@ const sketch = (p: p5) => {
 		player1 = new Paddle(Board.backBorder, p.height / 2);
 		player2 = new Paddle(Board.width - Board.backBorder - Paddle.width, p.height / 2);
 		ball = new Ball();
+		ai = new AI(ball, player2, player1);
+		aiUpdateTimer = p.millis();
 	};
 
 	p.draw = () => {
@@ -53,7 +62,12 @@ const sketch = (p: p5) => {
 			displayCountdown();
 		}
 		player1.update();
-
+		currentTime = p.millis();
+		if (currentTime - aiUpdateTimer >= AI_UPDATE_INTERVAL) {
+			ai.predict(ball);
+			aiUpdateTimer = currentTime;
+		}
+		ai.movePaddle();
 		player2.update();
 		if (gameState === GameState.Playing) {
 			ball.update();

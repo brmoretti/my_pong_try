@@ -96,4 +96,5 @@ export abstract class ABall {
 	get currentYSpeed(): number {
 		return this.ySpeed;
 	}
+
 }
