@@ -1,7 +1,6 @@
 import { Board, Side } from './Board'
 import { Ball } from './Ball';
 import { Paddle } from './Paddle';
-import { AIBall } from './AIBall'
 import { ABall } from './ABall';
 
 export class AI {
@@ -11,11 +10,9 @@ export class AI {
 	protected		aiSide: Side;
 	protected		aiX: number;
 	protected		opponentX: number;
-	protected		aiBall: AIBall;
 
 
 	constructor(ball: Ball, aiPlayer: Paddle, aiOpponent: Paddle) {
-		this.aiBall = new AIBall();
 		this.aiPlayer = aiPlayer;
 		this.aiOpponent = aiOpponent;
 		if (aiPlayer.x > aiOpponent.x) {

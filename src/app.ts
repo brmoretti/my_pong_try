@@ -8,7 +8,6 @@ import { Ball } from './Ball'
 import { Side } from './Board'
 import fontUrl from '../public/PressStart2P-Regular.ttf';
 import { ABall } from './ABall';
-import { AIBall } from './AIBall';
 import { AI } from './AI';
 
 let retroFont: p5.Font;

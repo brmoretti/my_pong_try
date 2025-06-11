@@ -3,7 +3,7 @@ import { Board } from "./Board"
 export abstract class ABall {
 	static readonly radius: number = Math.min(Board.width, Board.height) / 50;
 	static readonly startSpeed: number = Board.diag / 200;
-	static readonly acceleration: number = 1.02;
+	static readonly acceleration: number = 1.03;
 	static readonly drag: number = 0.2;
 	protected		x: number = 0;
 	protected		y: number = 0;
@@ -22,16 +22,10 @@ export abstract class ABall {
 
 	invertXSpeed() {
 		this.xSpeed *= -1;
-		this.accelerate();
 	}
 
 	invertYSpeed() {
 		this.ySpeed *= -1;
-		this.accelerate();
-	}
-
-	setY(newY: number) {
-		this.y = newY;
 	}
 
 	collisionFromBottonToTop(y_level: number): boolean {
@@ -56,6 +50,7 @@ export abstract class ABall {
 		if (this.xSpeed < 0 && this.x <= x_level) {
 			this.x = x_level;
 			this.invertXSpeed();
+			this.accelerate();
 			return true;
 		}
 		return false;
@@ -65,6 +60,7 @@ export abstract class ABall {
 		if (this.xSpeed > 0 && this.x + 2 * ABall.radius >= x_level) {
 			this.x = x_level - 2 * ABall.radius;
 			this.invertXSpeed();
+			this.accelerate();
 			return true;
 		}
 		return false;
