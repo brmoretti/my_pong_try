@@ -5,9 +5,9 @@ export class Paddle {
 	y: number
 	static readonly height: number = Board.height / 4;
 	static readonly width: number = Board.width / 50;
-	static readonly baseSpeed: number = Board.height / 75;
-	isDown = false;
-	isUp = false;
+	static readonly baseSpeed: number = Board.height / 200;
+	goDown = false;
+	goUp = false;
 	private speed: number = 0;
 	private score: number = 0;
 
@@ -31,9 +31,9 @@ export class Paddle {
 	}
 
 	update() {
-		if (this.isUp) {
+		if (this.goUp) {
 			this.up();
-		} else if (this.isDown) {
+		} else if (this.goDown) {
 			this.down();
 		} else {
 			this.speed = 0;

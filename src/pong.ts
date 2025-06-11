@@ -7,12 +7,14 @@ import { Board } from './Board';
 import { Ball } from './Ball'
 import { Side } from './Board'
 import fontUrl from '../public/PressStart2P-Regular.ttf';
-import { ABall } from './ABall';
 import { AI } from './AI';
 
 let retroFont: p5.Font;
 
 const sketch = (p: p5) => {
+
+	const targetFrameRate = 144;
+
 	enum GameState {
 		StartScreen,
 		Countdown,
@@ -41,7 +43,10 @@ const sketch = (p: p5) => {
 
 	p.setup = () => {
 		const canvas = p.createCanvas(Board.width, Board.height);
-		canvas.parent('app');
+		canvas.parent('pong');
+
+		p.frameRate(targetFrameRate);
+
 		player1 = new Paddle(Board.backBorder, p.height / 2);
 		player2 = new Paddle(Board.width - Board.backBorder - Paddle.width, p.height / 2);
 		ball = new Ball();
@@ -52,6 +57,7 @@ const sketch = (p: p5) => {
 	p.draw = () => {
 		p.clear();
 		p.background(0);
+
 		if (gameState === GameState.StartScreen) {
 			displayStartScreen();
 			return;
@@ -90,22 +96,22 @@ const sketch = (p: p5) => {
 		switch (p.key) {
 			case 'a':
 			case 'A': {
-				player1.isUp = true;
+				player1.goUp = true;
 				break;
 			}
 			case 'z':
 			case 'Z': {
-				player1.isDown = true;
+				player1.goDown = true;
 				break;
 			}
 		}
 		switch (p.keyCode) {
 			case p.UP_ARROW: {
-				player2.isUp = true;
+				player2.goUp = true;
 				break;
 			}
 			case p.DOWN_ARROW: {
-				player2.isDown = true;
+				player2.goDown = true;
 				break;
 			}
 		}
@@ -115,22 +121,22 @@ const sketch = (p: p5) => {
 		switch (p.key) {
 			case 'a':
 			case 'A': {
-				player1.isUp = false;
+				player1.goUp = false;
 				break;
 			}
 			case 'z':
 			case 'Z': {
-				player1.isDown = false;
+				player1.goDown = false;
 				break;
 			}
 		}
 		switch (p.keyCode) {
 			case p.UP_ARROW: {
-				player2.isUp = false;
+				player2.goUp = false;
 				break;
 			}
 			case p.DOWN_ARROW: {
-				player2.isDown = false;
+				player2.goDown = false;
 				break;
 			}
 		}
@@ -184,7 +190,7 @@ const sketch = (p: p5) => {
 	function displayBall(ball: Ball) {
 		p.stroke(255);
 		p.fill(255);
-		p.square(ball.currentX, ball.currentY, 2 * ABall.radius);
+		p.square(ball.currentX, ball.currentY, 2 * Ball.radius);
 	}
 
 	function displayCenterLine() {
@@ -244,7 +250,7 @@ const sketch = (p: p5) => {
 		if (ball.currentX <= 0) {
 			ball.reset(Side.Left);
 			player2.scoreUp();
-		} else if (ball.currentX + 2 * ABall.radius >= Board.width) {
+		} else if (ball.currentX + 2 * Ball.radius >= Board.width) {
 			ball.reset(Side.Right);
 			player1.scoreUp();
 		}

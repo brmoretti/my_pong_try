@@ -1,18 +1,24 @@
-import { Board } from "./Board";
+import { Board } from "./Board"
 import { Side } from "./Board";
-import { ABall } from "./ABall";
 
-export class Ball extends ABall {
+export class Ball {
+	static readonly radius: number = Math.min(Board.width, Board.height) / 50;
+	static readonly startSpeed: number = Board.diag / 400;
+	static readonly acceleration: number = 1.03;
+	static readonly drag: number = 0.2;
+	protected		x: number = 0;
+	protected		y: number = 0;
+	protected		ySpeed: number = 0;
+	protected		xSpeed: number = 0;
 
 	constructor() {
-		super();
 	}
 
 	reset(side: Side) {
-		this.x = Board.width / 2 - ABall.radius;
-		this.y = Board.height / 2 - ABall.radius;
-		this.xSpeed = Ball.randomBetween(0.4 * ABall.startSpeed, 0.8 * ABall.startSpeed);
-		this.ySpeed = Math.sqrt(ABall.startSpeed ** 2 - this.xSpeed ** 2);
+		this.x = Board.width / 2 - Ball.radius;
+		this.y = Board.height / 2 - Ball.radius;
+		this.xSpeed = Ball.randomBetween(0.4 * Ball.startSpeed, 0.8 * Ball.startSpeed);
+		this.ySpeed = Math.sqrt(Ball.startSpeed ** 2 - this.xSpeed ** 2);
 		this.xSpeed *= side === Side.Right ? 1 : -1;
 		this.ySpeed *= Math.random() < 0.5 ? -1 : 1;
 	}
@@ -29,4 +35,83 @@ export class Ball extends ABall {
 	static randomBetween(min: number, max: number) {
 		return Math.random() * (max - min) + min;
 	}
+
+	accelerate() {
+		this.xSpeed *= Ball.acceleration;
+		this.ySpeed *= Ball.acceleration;
+	}
+
+	invertXSpeed() {
+		this.xSpeed *= -1;
+	}
+
+	invertYSpeed() {
+		this.ySpeed *= -1;
+	}
+
+	collisionFromBottonToTop(y_level: number): boolean {
+		if (this.ySpeed < 0 && this.y <= y_level) {
+			this.y = y_level;
+			this.invertYSpeed();
+			return true;
+		}
+		return false;
+	}
+
+	collisionFromTopToBotton(y_level: number): boolean {
+		if (this.ySpeed > 0 && this.y +  2 * Ball.radius >= y_level) {
+			this.y = y_level - 2 * Ball.radius;
+			this.invertYSpeed();
+			return true;
+		}
+		return false;
+	}
+
+	collisionFromRightToLeft(x_level: number): boolean {
+		if (this.xSpeed < 0 && this.x <= x_level) {
+			this.x = x_level;
+			this.invertXSpeed();
+			this.accelerate();
+			return true;
+		}
+		return false;
+	}
+
+	collisionFromLeftToRight(x_level: number): boolean {
+		if (this.xSpeed > 0 && this.x + 2 * Ball.radius >= x_level) {
+			this.x = x_level - 2 * Ball.radius;
+			this.invertXSpeed();
+			this.accelerate();
+			return true;
+		}
+		return false;
+	}
+
+	isInFrontOf(lower_y: number, higher_y: number): boolean {
+		return this.y + 2 * Ball.radius >= higher_y && this.y <= lower_y;
+	}
+
+	ballPaddleHit(paddleSpeed: number) {
+		this.ySpeed += paddleSpeed * Ball.drag;
+
+		const maxYSpeed = Ball.startSpeed;
+		this.ySpeed = Math.max(-maxYSpeed, Math.min(maxYSpeed, this.ySpeed));
+	}
+
+	get currentX(): number {
+		return this.x;
+	}
+
+	get currentY(): number {
+		return this.y;
+	}
+
+	get currentXSpeed(): number {
+		return this.xSpeed;
+	}
+
+	get currentYSpeed(): number {
+		return this.ySpeed;
+	}
+
 }

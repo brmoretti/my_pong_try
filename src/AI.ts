@@ -1,7 +1,6 @@
 import { Board, Side } from './Board'
-import { Ball } from './Ball';
+import { Ball } from './Ball'
 import { Paddle } from './Paddle';
-import { ABall } from './ABall';
 
 export class AI {
 	protected		aiTargetY: number = Board.height / 2;
@@ -35,7 +34,7 @@ export class AI {
 	// 	// If ball is moving toward AI (positive X speed)
 	// 	if (ball.currentXSpeed > 0) {
 	// 		// Simple linear prediction
-	// 		const timeToReach = (this.aiX - ball.currentX - 2 * ABall.radius) / ball.currentXSpeed;
+	// 		const timeToReach = (this.aiX - ball.currentX - 2 * Ball.radius) / ball.currentXSpeed;
 	// 		let predictedY = ball.currentY + (ball.currentYSpeed * timeToReach);
 
 	// 		// Handle wall bounces
@@ -48,7 +47,7 @@ export class AI {
 	// 			}
 	// 		}
 
-	// 		this.aiTargetY = predictedY + ABall.radius;
+	// 		this.aiTargetY = predictedY + Ball.radius;
 	// 	} else {
 	// 		// Ball moving away, assume it will come back at center
 	// 		this.aiTargetY = Board.height / 2;
@@ -64,7 +63,7 @@ export class AI {
 		}
 
 		if (ball.currentXSpeed > 0) {
-			const timeToReach = (this.aiX - ball.currentX - 2 * ABall.radius) / ball.currentXSpeed;
+			const timeToReach = (this.aiX - ball.currentX - 2 * Ball.radius) / ball.currentXSpeed;
 			let predictedY = ball.currentY + (ball.currentYSpeed * timeToReach);
 
 			while (predictedY < 0 || predictedY > Board.height) {
@@ -75,7 +74,7 @@ export class AI {
 					predictedY = 2 * Board.height - predictedY;
 				}
 			}
-			this.aiTargetY = predictedY + ABall.radius;
+			this.aiTargetY = predictedY + Ball.radius;
 		} else {
 			const timeToOpponent = (this.opponentX - ball.currentX) / ball.currentXSpeed;
 			let bounceY = ball.currentY + (ball.currentYSpeed * timeToOpponent);
@@ -92,7 +91,7 @@ export class AI {
 			const newXSpeed = -ball.currentXSpeed;
 			const newYSpeed = ball.currentYSpeed;
 
-			const timeToAI = (this.aiX - this.opponentX - 2 * ABall.radius) / newXSpeed;
+			const timeToAI = (this.aiX - this.opponentX - 2 * Ball.radius) / newXSpeed;
 			let finalPredictedY = bounceY + (newYSpeed * timeToAI);
 
 
@@ -105,7 +104,7 @@ export class AI {
 				}
 			}
 
-			this.aiTargetY = finalPredictedY + ABall.radius;
+			this.aiTargetY = finalPredictedY + Ball.radius;
 		}
 	}
 
@@ -114,17 +113,14 @@ export class AI {
 		const tolerance = 5;
 
 		if (current_y < this.aiTargetY - tolerance) {
-			this.aiPlayer.isDown = true;
-			this.aiPlayer.isUp = false;
-			console.log(`AI moving DOWN: current=${current_y.toFixed(2)}, target=${this.aiTargetY.toFixed(2)}`);
+			this.aiPlayer.goDown = true;
+			this.aiPlayer.goUp = false;
 		} else if (current_y > this.aiTargetY + tolerance) {
-			this.aiPlayer.isUp = true;
-			this.aiPlayer.isDown = false;
-			console.log(`AI moving UP: current=${current_y.toFixed(2)}, target=${this.aiTargetY.toFixed(2)}`);
+			this.aiPlayer.goUp = true;
+			this.aiPlayer.goDown = false;
 		} else {
-			this.aiPlayer.isDown = false;
-			this.aiPlayer.isUp = false;
-			console.log(`AI STOPPED: current=${current_y.toFixed(2)}, target=${this.aiTargetY.toFixed(2)}`);
+			this.aiPlayer.goDown = false;
+			this.aiPlayer.goUp = false;
 		}
 	}
 
