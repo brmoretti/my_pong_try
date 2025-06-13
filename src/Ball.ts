@@ -3,11 +3,13 @@ import { Side } from "./Board";
 
 export class Ball {
 	static readonly radius: number = Math.min(Board.width, Board.height) / 50;
-	static readonly startSpeed: number = Board.diag / 400;
-	static readonly acceleration: number = 1.03;
-	static readonly drag: number = 0.2;
+	static readonly startSpeed: number = Board.diag / 350;
+	static readonly accelerationAmort: number = 100;
+	static readonly acceleration: number = 1.2;
+	static readonly drag: number = 0.3;
 	protected		x: number = 0;
 	protected		y: number = 0;
+	protected		nBounces: number = 0;
 	protected		ySpeed: number = 0;
 	protected		xSpeed: number = 0;
 
@@ -29,6 +31,7 @@ export class Ball {
 		this.ySpeed = Math.sqrt(Ball.startSpeed ** 2 - this.xSpeed ** 2);
 		this.xSpeed *= side === Side.Right ? 1 : -1;
 		this.ySpeed *= Math.random() < 0.5 ? -1 : 1;
+		this.nBounces = 0;
 	}
 
 	update() {
@@ -45,8 +48,10 @@ export class Ball {
 	}
 
 	accelerate() {
-		this.xSpeed *= Ball.acceleration;
-		this.ySpeed *= Ball.acceleration;
+		++this.nBounces;
+		const acceleration: number = 1 + Ball.acceleration / Math.sqrt(Ball.accelerationAmort * this.nBounces);
+		this.xSpeed *= acceleration
+		this.ySpeed *= acceleration;
 	}
 
 	invertXSpeed() {

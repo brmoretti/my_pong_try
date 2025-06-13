@@ -95,7 +95,7 @@ export class AI {
 
 	movePaddle() {
 		const current_y: number = this.aiPlayer.y + (Paddle.height / 2);
-		const tolerance = 5;
+		const tolerance = Board.height / 50;
 
 		if (current_y < this.aiTargetY - tolerance) {
 			this.aiPlayer.goDown = true;

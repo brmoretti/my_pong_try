@@ -5,7 +5,7 @@ export class Paddle {
 	y: number
 	static readonly height: number = Board.height / 4;
 	static readonly width: number = Board.width / 50;
-	static readonly baseSpeed: number = Board.height / 200;
+	static readonly baseSpeed: number = Board.height / 150;
 	goDown = false;
 	goUp = false;
 	private speed: number = 0;
