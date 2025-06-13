@@ -3,12 +3,12 @@ import { Ball } from './Ball'
 import { Paddle } from './Paddle';
 
 export class AI {
-	protected		aiTargetY: number = Board.height / 2;
-	protected		aiPlayer: Paddle;
-	protected		aiOpponent: Paddle;
-	protected		aiSide: Side;
-	protected		aiX: number;
-	protected		opponentX: number;
+	protected aiTargetY: number = Board.height / 2;
+	protected aiPlayer: Paddle;
+	protected aiOpponent: Paddle;
+	protected aiSide: Side;
+	protected aiX: number;
+	protected opponentX: number;
 
 
 	constructor(ball: Ball, aiPlayer: Paddle, aiOpponent: Paddle) {
@@ -25,38 +25,75 @@ export class AI {
 		}
 	}
 
-	// predict(ball: Ball) { //less complex but harder
-	// 	if (ball.currentXSpeed === 0 && ball.currentYSpeed === 0) {
-	// 		this.aiTargetY = Board.height / 2;
-	// 		return;
-	// 	}
+	predict(ball: Ball) {
+		if (ball.currentXSpeed === 0 && ball.currentYSpeed === 0) {
+			this.aiTargetY = Board.height / 2;
+			return;
+		}
 
-	// 	// If ball is moving toward AI (positive X speed)
-	// 	if (ball.currentXSpeed > 0) {
-	// 		// Simple linear prediction
-	// 		const timeToReach = (this.aiX - ball.currentX - 2 * Ball.radius) / ball.currentXSpeed;
-	// 		let predictedY = ball.currentY + (ball.currentYSpeed * timeToReach);
+		let timeToReach: number;
+		if (this.aiSide === Side.Left) {
+			timeToReach = (this.aiX - ball.RightX) / ball.currentXSpeed;
+		} else {
+			timeToReach = -((ball.LeftX - this.aiX) / ball.currentXSpeed);
+		}
 
-	// 		// Handle wall bounces
-	// 		while (predictedY < 0 || predictedY > Board.height) {
-	// 			if (predictedY < 0) {
-	// 				predictedY = -predictedY;
-	// 			}
-	// 			if (predictedY > Board.height) {
-	// 				predictedY = 2 * Board.height - predictedY;
-	// 			}
-	// 		}
+		if (timeToReach < 0) {
+			this.aiTargetY = Board.height / 2;
+			return;
+		}
 
-	// 		this.aiTargetY = predictedY + Ball.radius;
-	// 	} else {
-	// 		// Ball moving away, assume it will come back at center
-	// 		this.aiTargetY = Board.height / 2;
-	// 	}
+		let newBall: Ball = new Ball(ball);
 
-	// 	console.log(`Simple prediction: ${this.aiTargetY.toFixed(2)}`);
-	// }
+		if (this.isBallMovingAway(newBall)) {
+			const predictedY: number = this.predictBallComming(newBall, timeToReach);
+			if (newBall.currentXSpeed < 0) {
+				newBall.setBallPosition(this.opponentX, predictedY - Ball.radius)
+			} else {
+				newBall.setBallPosition(this.opponentX - 2 * Ball.radius, predictedY - Ball.radius)
+			}
+			newBall.invertXSpeed();
+			newBall.accelerate();
+			const distBetweenPaddles: number = Math.abs(this.aiX - this.opponentX);
+			timeToReach = distBetweenPaddles / newBall.currentXSpeed;
+		}
+		this.aiTargetY = this.predictBallComming(newBall, timeToReach);
 
-	predict(ball: Ball) { //complex but easier
+	}
+
+	isBallMovingAway(ball: Ball): Boolean {
+		if (this.aiSide === Side.Left && ball.currentXSpeed > 0) return true;
+		if (this.aiSide === Side.Right && ball.currentXSpeed < 0) return true;
+		return false;
+	}
+
+	predictBallComming(ball: Ball, timeToReach: number): number {
+		let predictedY: number = ball.centerY + (ball.currentYSpeed * timeToReach);
+
+		let bounces = 0;
+		const maxBounces = 10;
+
+		if (ball.currentYSpeed === 0) {
+			return Math.max(Ball.radius, Math.min(Board.height - Ball.radius, predictedY));
+		}
+
+		while ((predictedY - Ball.radius < 0 || predictedY + Ball.radius > Board.height) && bounces < maxBounces) {
+			if (predictedY - Ball.radius < 0) {
+				predictedY = -(predictedY - Ball.radius) + Ball.radius;
+			}
+			if (predictedY + Ball.radius > Board.height) {
+				predictedY = 2 * Board.height - predictedY;
+			}
+			bounces++;
+		}
+
+		if (predictedY - Ball.radius < 0) predictedY = Ball.radius;
+		if (predictedY + Ball.radius > Board.height) predictedY = Board.height - Ball.radius;
+
+		return predictedY;
+	}
+
+	predict2(ball: Ball) { //complex but easier
 		if (ball.currentXSpeed === 0 && ball.currentYSpeed === 0) {
 			this.aiTargetY = Board.height / 2;
 			return;

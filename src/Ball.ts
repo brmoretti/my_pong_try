@@ -11,7 +11,15 @@ export class Ball {
 	protected		ySpeed: number = 0;
 	protected		xSpeed: number = 0;
 
-	constructor() {
+	constructor();
+	constructor(other: Ball);
+	constructor(other?: Ball) {
+		if (other) {
+			this.x = other.x;
+			this.y = other.y;
+			this.xSpeed = other.xSpeed;
+			this.ySpeed = other.ySpeed;
+		}
 	}
 
 	reset(side: Side) {
@@ -112,6 +120,40 @@ export class Ball {
 
 	get currentYSpeed(): number {
 		return this.ySpeed;
+	}
+
+	get centerX(): number {
+		return this.x + Ball.radius;
+	}
+
+	get centerY(): number {
+		return this.y + Ball.radius;
+	}
+
+	get TopY(): number {
+		return this.y;
+	}
+
+	get RightX(): number {
+		return this.x + 2 * Ball.radius;
+	}
+
+	get DownY(): number {
+		return this.y + 2 * Ball.radius;
+	}
+
+	get LeftX(): number {
+		return this.x;
+	}
+
+	setBallPosition(x: number, y: number) {
+		this.x = x;
+		this.y = y;
+	}
+
+	setBallSpeed(xSpeed: number, ySpeed: number) {
+		this.xSpeed = xSpeed;
+		this.ySpeed = ySpeed;
 	}
 
 }
