@@ -8,8 +8,13 @@ import { Ball } from './Ball'
 import { Side } from './Board'
 import fontUrl from '../public/PressStart2P-Regular.ttf';
 import { AI } from './AI';
+import { loadConfigFromJson } from './config/ConfigLoader';
 
 let retroFont: p5.Font;
+
+async function startGame() {
+	const config = await loadConfigFromJson();
+}
 
 const sketch = (p: p5) => {
 
@@ -28,7 +33,6 @@ const sketch = (p: p5) => {
 	let ball: Ball;
 	const textSize: number = Board.diag / 10;
 	let countdownStartTime: number = 0;
-	const countdownDuration = 4000;
 
 	//AI variables
 	let ai: AI;
@@ -52,6 +56,7 @@ const sketch = (p: p5) => {
 		ball = new Ball();
 		ai = new AI(ball, player1, player2);
 		aiUpdateTimer = p.millis();
+		startGame();
 	};
 
 	p.draw = () => {
@@ -164,6 +169,8 @@ const sketch = (p: p5) => {
 	}
 
 	function displayCountdown() {
+		const countdownDuration: number = 4000;
+
 		p.textFont(retroFont);
 		const elapsed = p.millis() - countdownStartTime;
 		let count = 3 - Math.floor(elapsed / 1000);
