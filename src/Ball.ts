@@ -6,7 +6,7 @@ export class Ball {
 	static readonly startSpeed: number = Board.diag / 350;
 	static readonly accelerationAmort: number = 100;
 	static readonly acceleration: number = 1.2;
-	static readonly drag: number = 0.3;
+	static readonly drag: number = 1.0;
 	protected		x: number = 0;
 	protected		y: number = 0;
 	protected		nBounces: number = 0;
@@ -27,7 +27,7 @@ export class Ball {
 	reset(side: Side) {
 		this.x = Board.width / 2 - Ball.radius;
 		this.y = Board.height / 2 - Ball.radius;
-		this.xSpeed = Ball.randomBetween(0.4 * Ball.startSpeed, 0.8 * Ball.startSpeed);
+		this.xSpeed = Ball.randomBetween(0.5 * Ball.startSpeed, 0.8 * Ball.startSpeed);
 		this.ySpeed = Math.sqrt(Ball.startSpeed ** 2 - this.xSpeed ** 2);
 		this.xSpeed *= side === Side.Right ? 1 : -1;
 		this.ySpeed *= Math.random() < 0.5 ? -1 : 1;
@@ -101,13 +101,13 @@ export class Ball {
 	}
 
 	isInFrontOf(lower_y: number, higher_y: number): boolean {
-		return this.y + 2 * Ball.radius >= higher_y && this.y <= lower_y;
+		return this.bottonY >= higher_y && this.topY <= lower_y;
 	}
 
 	ballPaddleHit(paddleSpeed: number) {
 		this.ySpeed += paddleSpeed * Ball.drag;
 
-		const maxYSpeed = Ball.startSpeed;
+		const maxYSpeed = Math.abs(1.2 * this.xSpeed);
 		this.ySpeed = Math.max(-maxYSpeed, Math.min(maxYSpeed, this.ySpeed));
 	}
 
@@ -135,19 +135,19 @@ export class Ball {
 		return this.y + Ball.radius;
 	}
 
-	get TopY(): number {
+	get topY(): number {
 		return this.y;
 	}
 
-	get RightX(): number {
+	get rightX(): number {
 		return this.x + 2 * Ball.radius;
 	}
 
-	get DownY(): number {
+	get bottonY(): number {
 		return this.y + 2 * Ball.radius;
 	}
 
-	get LeftX(): number {
+	get leftX(): number {
 		return this.x;
 	}
 

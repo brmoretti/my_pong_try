@@ -33,9 +33,9 @@ export class AI {
 
 		let timeToReach: number;
 		if (this.aiSide === Side.Left) {
-			timeToReach = (this.aiX - ball.RightX) / ball.currentXSpeed;
+			timeToReach = (this.aiX - ball.rightX) / ball.currentXSpeed;
 		} else {
-			timeToReach = -((ball.LeftX - this.aiX) / ball.currentXSpeed);
+			timeToReach = -((ball.leftX - this.aiX) / ball.currentXSpeed);
 		}
 
 		if (timeToReach < 0) {

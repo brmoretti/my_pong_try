@@ -17,16 +17,20 @@ export class Paddle {
 	}
 
 	up() {
-		if (this.y >= 0) {
+		if (this.y > 0) {
 			this.y -= Paddle.baseSpeed;
 			this.speed = -Paddle.baseSpeed;
+		} else {
+			this.speed = 0;
 		}
 	}
 
 	down() {
-		if (this.y + Paddle.height <= Board.height) {
+		if (this.y + Paddle.height < Board.height) {
 			this.y += Paddle.baseSpeed;
 			this.speed = Paddle.baseSpeed;
+		} else {
+			this.speed = 0;
 		}
 	}
 
