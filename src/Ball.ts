@@ -107,7 +107,7 @@ export class Ball {
 	ballPaddleHit(paddleSpeed: number) {
 		this.ySpeed += paddleSpeed * Ball.drag;
 
-		const maxYSpeed = Math.abs(1.2 * this.xSpeed);
+		const maxYSpeed = Math.abs(this.xSpeed);
 		this.ySpeed = Math.max(-maxYSpeed, Math.min(maxYSpeed, this.ySpeed));
 	}
 

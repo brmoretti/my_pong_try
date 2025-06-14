@@ -50,7 +50,7 @@ const sketch = (p: p5) => {
 		player1 = new Paddle(Board.backBorder, p.height / 2);
 		player2 = new Paddle(Board.width - Board.backBorder - Paddle.width, p.height / 2);
 		ball = new Ball();
-		ai = new AI(ball, player2, player1);
+		ai = new AI(ball, player1, player2);
 		aiUpdateTimer = p.millis();
 	};
 

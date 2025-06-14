@@ -9,6 +9,8 @@ export class AI {
 	protected aiSide: Side;
 	protected aiX: number;
 	protected opponentX: number;
+	protected rightPaddleX: number;
+	protected leftPaddleX: number;
 
 
 	constructor(ball: Ball, aiPlayer: Paddle, aiOpponent: Paddle) {
@@ -16,10 +18,14 @@ export class AI {
 		this.aiOpponent = aiOpponent;
 		if (aiPlayer.x > aiOpponent.x) {
 			this.aiSide = Side.Right;
+			this.rightPaddleX = aiPlayer.x;
+			this.leftPaddleX = aiOpponent.x + Paddle.width;
 			this.aiX = aiPlayer.x;
 			this.opponentX = aiOpponent.x + Paddle.width;
 		} else {
 			this.aiSide = Side.Left;
+			this.rightPaddleX = aiOpponent.x;
+			this.leftPaddleX = aiPlayer.x + Paddle.width;
 			this.aiX = aiPlayer.x + Paddle.width;
 			this.opponentX = aiOpponent.x;
 		}
@@ -32,11 +38,8 @@ export class AI {
 		}
 
 		let timeToReach: number;
-		if (this.aiSide === Side.Left) {
-			timeToReach = (this.aiX - ball.rightX) / ball.currentXSpeed;
-		} else {
-			timeToReach = -((ball.leftX - this.aiX) / ball.currentXSpeed);
-		}
+
+		timeToReach = this.timeToReach(ball);
 
 		if (timeToReach < 0) {
 			this.aiTargetY = Board.height / 2;
@@ -48,17 +51,33 @@ export class AI {
 		if (this.isBallMovingAway(newBall)) {
 			const predictedY: number = this.predictBallComming(newBall, timeToReach);
 			if (newBall.currentXSpeed < 0) {
-				newBall.setBallPosition(this.opponentX, predictedY - Ball.radius)
+				newBall.setBallPosition(this.leftPaddleX, predictedY - Ball.radius)
 			} else {
-				newBall.setBallPosition(this.opponentX - 2 * Ball.radius, predictedY - Ball.radius)
+				newBall.setBallPosition(this.rightPaddleX - 2 * Ball.radius, predictedY - Ball.radius)
 			}
 			newBall.invertXSpeed();
 			newBall.accelerate();
-			const distBetweenPaddles: number = Math.abs(this.aiX - this.opponentX);
-			timeToReach = distBetweenPaddles / newBall.currentXSpeed;
+			timeToReach = this.timeToReach(newBall);
 		}
 		this.aiTargetY = this.predictBallComming(newBall, timeToReach);
 
+	}
+
+	timeToReach(ball: Ball): number {
+		let targetX: number;
+		let ballX: number;
+
+		if (ball.currentXSpeed > 0) {
+			targetX = this.rightPaddleX;
+			ballX = ball.rightX;
+		} else {
+			targetX = this.leftPaddleX;
+			ballX = ball.leftX;
+		}
+
+		const distance: number = targetX - ballX;
+
+		return distance / ball.currentXSpeed;
 	}
 
 	isBallMovingAway(ball: Ball): Boolean {
