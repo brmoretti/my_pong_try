@@ -33,7 +33,7 @@ const sketch = (p: p5) => {
 	let ai1: AI;
 	let ai2: AI;
 	let aiUpdateTimer: number = 0;
-	let currentTime: number
+	let currentTime: number;
 
 	let config: Config;
 
@@ -74,16 +74,17 @@ const sketch = (p: p5) => {
 			displayCountdown();
 		}
 
-		handleAI();
 		player1.update();
 		player2.update();
 
 		if (gameState === GameState.Playing) {
+			handleAI();
 			ball.update();
 			handleCollision(player1, player2, ball);
 			checkForPoint(player1, player2, ball);
 			displayBall(ball);
 		}
+
 		checkScore(player1, player2);
 		if (gameState === GameState.End) {
 			displayWinnerScreen(player1, player2);
@@ -97,7 +98,7 @@ const sketch = (p: p5) => {
 				countdownStartTime = p.millis();
 			}
 		}
-		if (config.player1IsAI === false) {
+		if (!config.player1IsAI) {
 			switch (p.key) {
 				case 'a':
 				case 'A': {
@@ -111,7 +112,7 @@ const sketch = (p: p5) => {
 				}
 			}
 		}
-		if (config.player2IsAI === false) {
+		if (!config.player2IsAI) {
 			switch (p.keyCode) {
 				case p.UP_ARROW: {
 					player2.goUp = true;
@@ -126,26 +127,30 @@ const sketch = (p: p5) => {
 	}
 
 	p.keyReleased = () => {
-		switch (p.key) {
-			case 'a':
-			case 'A': {
-				player1.goUp = false;
-				break;
-			}
-			case 'z':
-			case 'Z': {
-				player1.goDown = false;
-				break;
+		if (!config.player1IsAI) {
+			switch (p.key) {
+				case 'a':
+				case 'A': {
+					player1.goUp = false;
+					break;
+				}
+				case 'z':
+				case 'Z': {
+					player1.goDown = false;
+					break;
+				}
 			}
 		}
-		switch (p.keyCode) {
-			case p.UP_ARROW: {
-				player2.goUp = false;
-				break;
-			}
-			case p.DOWN_ARROW: {
-				player2.goDown = false;
-				break;
+		if (!config.player2IsAI) {
+			switch (p.keyCode) {
+				case p.UP_ARROW: {
+					player2.goUp = false;
+					break;
+				}
+				case p.DOWN_ARROW: {
+					player2.goDown = false;
+					break;
+				}
 			}
 		}
 	}
