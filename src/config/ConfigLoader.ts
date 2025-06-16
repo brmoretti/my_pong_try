@@ -8,6 +8,9 @@ export async function loadConfigFromJson(): Promise<Config> {
 
 	if (!player1) player1 = await getRandomPlayerName();
 	if (!player2) player2 = await getRandomPlayerName();
+	while (player2 === player1) {
+		player2 = await getRandomPlayerName();
+	}
 
 	return new Config(
 		player1,
