@@ -1,10 +1,8 @@
 import { Config } from './Config';
 import { getRandomPlayerName } from './nameGenerator';
+import json from '../../public/config.json';
 
 export async function loadConfigFromJson(): Promise<Config> {
-	const response = await fetch('/config.json');
-	const json = await response.json();
-
 	let player1 = json.player1 || "";
 	let player2 = json.player2 || "";
 
@@ -15,6 +13,7 @@ export async function loadConfigFromJson(): Promise<Config> {
 		player1,
 		player2,
 		json.player1IsAI ?? false,
-		json.player2IsAI ?? false
+		json.player2IsAI ?? false,
+		json.aiUpdateInterval ?? 1000
 	);
 }
