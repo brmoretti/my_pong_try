@@ -2,9 +2,6 @@
 
 A modern implementation of the classic Pong game, built with p5.js, TypeScript, and Parcel. Challenge a friend or test your skills against an AI opponent!
 
-![Pong Gameplay Screenshot](https://via.placeholder.com/800x400.png?text=Your+Pong+Game+Screenshot+Here)
-*(Suggestion: Replace the placeholder above with an actual screenshot or GIF of your game!)*
-
 ## ✨ Features
 
 *   **Classic Pong Gameplay:** Relive the timeless arcade experience.
