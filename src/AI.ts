@@ -80,7 +80,7 @@ export class AI {
 		return distance / ball.currentXSpeed;
 	}
 
-	isBallMovingAway(ball: Ball): Boolean {
+	isBallMovingAway(ball: Ball): boolean {
 		if (this.aiSide === Side.Left && ball.currentXSpeed > 0) return true;
 		if (this.aiSide === Side.Right && ball.currentXSpeed < 0) return true;
 		return false;
@@ -97,17 +97,19 @@ export class AI {
 		}
 
 		while ((predictedY - Ball.radius < 0 || predictedY + Ball.radius > Board.height) && bounces < maxBounces) {
-			if (predictedY - Ball.radius < 0) {
+			if (predictedY - Ball.radius < 0) { // Hit top wall
 				predictedY = -(predictedY - Ball.radius) + Ball.radius;
 			}
-			if (predictedY + Ball.radius > Board.height) {
+			if (predictedY + Ball.radius > Board.height) { // Hit bottom wall
 				predictedY = 2 * Board.height - predictedY;
 			}
 			bounces++;
 		}
 
-		if (predictedY - Ball.radius < 0) predictedY = Ball.radius;
-		if (predictedY + Ball.radius > Board.height) predictedY = Board.height - Ball.radius;
+		// Final clamping to ensure the ball center is such that the ball is within bounds.
+		// This is a safeguard, especially if timeToReach is very large or bounces calculation has issues.
+		predictedY = Math.max(Ball.radius, predictedY);
+		predictedY = Math.min(Board.height - Ball.radius, predictedY);
 
 		return predictedY;
 	}
