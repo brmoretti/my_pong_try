@@ -37,8 +37,12 @@ export async function getRandomPlayerName(): Promise<string> {
 
 		return `${adj} ${sub}`;
 
-	} catch (error) {
-		console.error("Error in getRandomPlayerName:", error);
+	} catch (e: unknown) {
+		if (e instanceof Error) {
+			console.error('Failed to fetch or parse player names:', e.message);
+		} else {
+			console.error('An unknown error occurred:', e);
+		}
 		return "Fallback Player";
 	}
 }
