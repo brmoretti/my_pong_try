@@ -62,7 +62,7 @@ export class Ball {
 		this.ySpeed *= -1;
 	}
 
-	collisionFromBottonToTop(y_level: number): boolean {
+	collisionFromBottomToTop(y_level: number): boolean {
 		if (this.ySpeed < 0 && this.y <= y_level) {
 			this.y = y_level;
 			this.invertYSpeed();
@@ -71,7 +71,7 @@ export class Ball {
 		return false;
 	}
 
-	collisionFromTopToBotton(y_level: number): boolean {
+	collisionFromTopToBottom(y_level: number): boolean {
 		if (this.ySpeed > 0 && this.y +  2 * Ball.radius >= y_level) {
 			this.y = y_level - 2 * Ball.radius;
 			this.invertYSpeed();

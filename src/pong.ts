@@ -262,8 +262,8 @@ const sketch = (p: p5) => {
 	}
 
 	function handleCollision(player1: Paddle, player2: Paddle, ball: Ball) {
-		ball.collisionFrombottomToTop(0);
-		ball.collisionFromTopTobottom(Board.height);
+		ball.collisionFromBottomToTop(0);
+		ball.collisionFromTopToBottom(Board.height);
 		if (ball.isInFrontOf(player1.y + Paddle.height, player1.y) &&
 			ball.collisionFromRightToLeft(player1.x + Paddle.width)) {
 			ball.ballPaddleHit(player1.currentSpeed);
