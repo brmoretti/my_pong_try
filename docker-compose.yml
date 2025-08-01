@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  pong-game:
+    build: .
+    ports:
+      - "1234:1234"  # Client port
+      - "8080:8080"  # WebSocket server port
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm start
+    stdin_open: true
+    tty: true

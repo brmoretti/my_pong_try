@@ -9,10 +9,11 @@
     // "disableSolutionSearching": true,                 /* Opt a project out of multi-project reference checking when editing. */
     // "disableReferencedProjectLoad": true,             /* Reduce the number of projects loaded automatically by TypeScript. */
     /* Language and Environment */
-    "target": "es2016", /* Set the JavaScript language version for emitted JavaScript. */
+    "target": "es2020", /* Set the JavaScript language version for emitted JavaScript. */
     "lib": [
-      "es2016",
-      "dom"
+      "es2020",
+      "dom",
+      "dom.iterable"
     ], /* Specify a set of bundled library declaration files that describe the target runtime environment. */
     // "jsx": "preserve",                                /* Specify what JSX code is generated. */
     // "libReplacement": true,                           /* Enable lib replacement. */

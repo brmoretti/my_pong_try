@@ -1,19 +1,29 @@
 {
   "name": "pong",
   "version": "1.0.0",
+  "type": "module",
   "description": "A simple pong game built with p5.js and TypeScript",
   "scripts": {
-    "start": "parcel index.html",
-    "build": "parcel build index.html"
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "client": "parcel index.html --port 1234 --host 0.0.0.0",
+    "server": "tsx server/server.ts",
+    "build": "parcel build index.html",
+    "dev:server": "tsx watch server/server.ts"
   },
   "devDependencies": {
     "@parcel/transformer-sass": "^2.15.2",
+    "@types/node": "^20.4.0",
     "@types/p5": "^1.7.6",
+    "@types/ws": "^8.5.5",
+    "concurrently": "^8.2.0",
     "parcel": "^2.12.0",
     "sass": "^1.77.8",
+    "ts-node": "^10.9.1",
+    "tsx": "^4.7.1",
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "p5": "^1.9.4"
+    "p5": "^1.9.4",
+    "ws": "^8.13.0"
   }
 }

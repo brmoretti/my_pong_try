@@ -48,6 +48,14 @@ export class Paddle {
 		this.score++;
 	}
 
+	setScore(newScore: number) {
+		this.score = newScore;
+	}
+
+	setPosition(newY: number) {
+		this.y = newY;
+	}
+
 	get currentScore(): number {
 		return this.score;
 	}
