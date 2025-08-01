@@ -6,8 +6,7 @@ export class Paddle {
 	static readonly height: number = Board.height / 4;
 	static readonly width: number = Board.width / 50;
 	static readonly baseSpeed: number = Board.height / 150;
-	goDown = false;
-	goUp = false;
+	direction = 0;
 	private speed: number = 0;
 	private score: number = 0;
 
@@ -35,9 +34,9 @@ export class Paddle {
 	}
 
 	update() {
-		if (this.goUp) {
+		if (this.direction === 1) {
 			this.up();
-		} else if (this.goDown) {
+		} else if (this.direction === -1) {
 			this.down();
 		} else {
 			this.speed = 0;

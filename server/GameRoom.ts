@@ -55,8 +55,14 @@ export class GameRoom {
 
   handlePlayerInput(input: PlayerInput): void {
     const paddle = input.playerId === 1 ? this.player1 : this.player2;
-    paddle.goUp = input.goUp;
-    paddle.goDown = input.goDown;
+
+    if (input.goUp && !input.goDown) {
+      paddle.direction = 1;
+    } else if (input.goDown && !input.goUp) {
+      paddle.direction = -1;
+    } else {
+      paddle.direction = 0;
+    }
   }
 
   private startCountdown(): void {

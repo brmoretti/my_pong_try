@@ -119,14 +119,11 @@ export class AI {
 		const tolerance = Board.height / 50;
 
 		if (current_y < this.aiTargetY - tolerance) {
-			this.aiPlayer.goDown = true;
-			this.aiPlayer.goUp = false;
+			this.aiPlayer.direction = -1;
 		} else if (current_y > this.aiTargetY + tolerance) {
-			this.aiPlayer.goUp = true;
-			this.aiPlayer.goDown = false;
+			this.aiPlayer.direction = 1;
 		} else {
-			this.aiPlayer.goDown = false;
-			this.aiPlayer.goUp = false;
+			this.aiPlayer.direction = 0;
 		}
 	}
 

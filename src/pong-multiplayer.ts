@@ -46,6 +46,12 @@ const sketch = (p: p5) => {
 	let isConnected: boolean = false;
 	let gameEndedAndScoreExported: boolean = false;
 
+	// Key state tracking for online multiplayer
+	let keyState = {
+		up: false,
+		down: false
+	};
+
 	// Local game variables (for single player and local multiplayer)
 	let config: Config;
 
@@ -168,56 +174,86 @@ const sketch = (p: p5) => {
 			return;
 		}
 
-		// Handle player input
-		handlePlayerInput(true);
-	};
-
-	p.keyReleased = () => {
-		handlePlayerInput(false);
-	};
-
-	function handlePlayerInput(isPressed: boolean): void {
+		// Handle player input for key press
 		if (gameMode === GameMode.OnlineMultiplayer) {
-			// Send input to server
+			// Update key state and send to server
 			if (multiplayerClient && myPlayerId) {
-				let goUp = false;
-				let goDown = false;
-
 				if (myPlayerId === 1) {
-					if (p.key === 'a' || p.key === 'A') goUp = isPressed;
-					if (p.key === 'z' || p.key === 'Z') goDown = isPressed;
+					if (p.key === 'a' || p.key === 'A') keyState.up = true;
+					if (p.key === 'z' || p.key === 'Z') keyState.down = true;
 				} else if (myPlayerId === 2) {
-					if (p.keyCode === p.UP_ARROW) goUp = isPressed;
-					if (p.keyCode === p.DOWN_ARROW) goDown = isPressed;
+					if (p.keyCode === p.UP_ARROW) keyState.up = true;
+					if (p.keyCode === p.DOWN_ARROW) keyState.down = true;
 				}
 
-				multiplayerClient.sendPaddleMove(goUp, goDown);
+				multiplayerClient.sendPaddleMove(keyState.up, keyState.down);
 			}
 		} else {
-			// Local input handling
+			// Local input handling for key press
 			// Player 1 controls
 			if (p.key === 'a' || p.key === 'A') {
-				player1.goUp = isPressed;
+				player1.direction = 1;
 			}
 			if (p.key === 'z' || p.key === 'Z') {
-				player1.goDown = isPressed;
+				player1.direction = -1;
 			}
 
 			// Player 2 controls (only in local multiplayer mode)
 			if (gameMode === GameMode.LocalMultiplayer) {
 				if (p.keyCode === p.UP_ARROW) {
-					player2.goUp = isPressed;
+					player2.direction = 1;
 				}
 				if (p.keyCode === p.DOWN_ARROW) {
-					player2.goDown = isPressed;
+					player2.direction = -1;
 				}
 			}
 		}
-	}
+	};
+
+	p.keyReleased = () => {
+		// Handle player input for key release
+		if (gameMode === GameMode.OnlineMultiplayer) {
+			// Update key state and send to server
+			if (multiplayerClient && myPlayerId) {
+				if (myPlayerId === 1) {
+					if (p.key === 'a' || p.key === 'A') keyState.up = false;
+					if (p.key === 'z' || p.key === 'Z') keyState.down = false;
+				} else if (myPlayerId === 2) {
+					if (p.keyCode === p.UP_ARROW) keyState.up = false;
+					if (p.keyCode === p.DOWN_ARROW) keyState.down = false;
+				}
+
+				multiplayerClient.sendPaddleMove(keyState.up, keyState.down);
+			}
+		} else {
+			// Local input handling for key release
+			// Player 1 controls
+			if (p.key === 'a' || p.key === 'A') {
+				player1.direction = 0;
+			}
+			if (p.key === 'z' || p.key === 'Z') {
+				player1.direction = 0;
+			}
+
+			// Player 2 controls (only in local multiplayer mode)
+			if (gameMode === GameMode.LocalMultiplayer) {
+				if (p.keyCode === p.UP_ARROW) {
+					player2.direction = 0;
+				}
+				if (p.keyCode === p.DOWN_ARROW) {
+					player2.direction = 0;
+				}
+			}
+		}
+	};
 
 	function startOnlineMultiplayer(): void {
 		gameMode = GameMode.OnlineMultiplayer;
 		gameState = GameState.WaitingForPlayer;
+
+		// Reset key state
+		keyState.up = false;
+		keyState.down = false;
 
 		// Initialize multiplayer client
 		multiplayerClient = new MultiplayerClient();
@@ -290,6 +326,10 @@ const sketch = (p: p5) => {
 	function restartGame(): void {
 		gameEndedAndScoreExported = false;
 
+		// Reset key state
+		keyState.up = false;
+		keyState.down = false;
+
 		if (gameMode === GameMode.OnlineMultiplayer && multiplayerClient) {
 			multiplayerClient.restartGame();
 		} else {
@@ -357,7 +397,7 @@ const sketch = (p: p5) => {
 		let modeText = '';
 		switch (gameMode) {
 			case GameMode.LocalSinglePlayer:
-				modeText = 'Single Player Mode';
+				modeText = '';
 				break;
 			case GameMode.LocalMultiplayer:
 				modeText = 'Local Multiplayer Mode';
@@ -379,7 +419,7 @@ const sketch = (p: p5) => {
 		p.textSize(textSize / 3);
 		p.text('Won the game', Board.width / 2, Board.height / 2 + textSize / 3);
 		p.textSize(textSize / 4);
-		p.text('Press R to restart', Board.width / 2, Board.height / 2 + textSize / 2);
+		p.text('Press R to restart', Board.width / 2, Board.height / 2 + 1.5 * textSize);
 	}
 
 	function displayCountdown(): void {
