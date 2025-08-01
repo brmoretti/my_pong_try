@@ -45,7 +45,7 @@ export class MultiplayerClient {
       const wsUrl = `ws://${wsHost}:${wsPort}`;
       console.log('Connecting to WebSocket:', wsUrl);
       this.ws = new WebSocket(wsUrl);
-      
+
       this.ws.onopen = () => {
         console.log('Connected to game server');
         if (this.connectionStatusCallback) {

@@ -10,7 +10,7 @@ if [ $? -eq 0 ]; then
     echo "🔌 WebSocket server will be available at: ws://localhost:8080"
     echo ""
     echo "Press Ctrl+C to stop the container"
-    
+
     docker run -p 1234:1234 -p 8080:8080 --rm pong-multiplayer
 else
     echo "❌ Docker build failed!"

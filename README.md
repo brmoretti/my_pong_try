@@ -132,7 +132,7 @@ If you can't connect to the multiplayer server:
    ```bash
    # Test HTTP client
    curl http://localhost:1234
-   
+
    # Run the connection test script
    ./test-connection.sh
    ```
@@ -141,10 +141,10 @@ If you can't connect to the multiplayer server:
    ```bash
    # Check if containers are running
    docker ps
-   
+
    # Check container logs
    docker logs <container-name>
-   
+
    # Rebuild with fresh network
    docker-compose down
    docker-compose up --build
@@ -160,7 +160,7 @@ If you can't connect to the multiplayer server:
    ```bash
    # Check if ports are already in use
    netstat -tuln | grep -E ':(1234|8080)'
-   
+
    # Kill conflicting processes if needed
    sudo lsof -ti:1234 | xargs kill -9
    sudo lsof -ti:8080 | xargs kill -9

@@ -11,7 +11,7 @@ class GameServer {
   constructor(port: number = 8080, host: string = '0.0.0.0') {
     this.wss = new WebSocketServer({ port, host });
     console.log(`WebSocket server started on ${host}:${port}`);
-    
+
     this.wss.on('connection', (ws: WebSocket) => {
       console.log('New client connected');
       this.handleConnection(ws);
@@ -141,7 +141,7 @@ class GameServer {
     const room = this.rooms.get(roomId);
     if (room) {
       room.removePlayer(ws);
-      
+
       // Clean up empty rooms
       if (room.isEmpty()) {
         this.rooms.delete(roomId);

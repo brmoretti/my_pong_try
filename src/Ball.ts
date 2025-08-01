@@ -7,11 +7,11 @@ export class Ball {
 	static readonly accelerationAmort: number = 100;
 	static readonly acceleration: number = 1.2;
 	static readonly drag: number = 1.0;
-	protected		x: number = 0;
-	protected		y: number = 0;
-	protected		nBounces: number = 0;
-	protected		ySpeed: number = 0;
-	protected		xSpeed: number = 0;
+	protected x: number = 0;
+	protected y: number = 0;
+	protected nBounces: number = 0;
+	protected ySpeed: number = 0;
+	protected xSpeed: number = 0;
 
 	constructor();
 	constructor(other: Ball);
@@ -72,7 +72,7 @@ export class Ball {
 	}
 
 	collisionFromTopToBottom(y_level: number): boolean {
-		if (this.ySpeed > 0 && this.y +  2 * Ball.radius >= y_level) {
+		if (this.ySpeed > 0 && this.y + 2 * Ball.radius >= y_level) {
 			this.y = y_level - 2 * Ball.radius;
 			this.invertYSpeed();
 			return true;

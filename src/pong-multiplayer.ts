@@ -48,7 +48,7 @@ const sketch = (p: p5) => {
 
 	// Local game variables (for single player and local multiplayer)
 	let config: Config;
-	
+
 	// AI variables for single player mode
 	let ai2: AI | null = null;
 	let aiUpdateTimer: number = 0;
@@ -59,7 +59,7 @@ const sketch = (p: p5) => {
 
 	p.setup = async () => {
 		const canvas = p.createCanvas(Board.width, Board.height);
-				canvas.parent('pong');
+		canvas.parent('pong');
 
 		p.frameRate(targetFrameRate);
 
@@ -70,7 +70,7 @@ const sketch = (p: p5) => {
 		player1 = new Paddle(Board.backBorder, p.height / 2);
 		player2 = new Paddle(Board.width - Board.backBorder - Paddle.width, p.height / 2);
 		ball = new Ball();
-		
+
 		// Initialize AI for single player mode
 		if (config.player2IsAI) {
 			ai2 = new AI(ball, player2, player1);
@@ -218,10 +218,10 @@ const sketch = (p: p5) => {
 	function startOnlineMultiplayer(): void {
 		gameMode = GameMode.OnlineMultiplayer;
 		gameState = GameState.WaitingForPlayer;
-		
+
 		// Initialize multiplayer client
 		multiplayerClient = new MultiplayerClient();
-		
+
 		// Set up event handlers
 		multiplayerClient.setOnConnectionStatus((connected: boolean) => {
 			isConnected = connected;
@@ -289,7 +289,7 @@ const sketch = (p: p5) => {
 
 	function restartGame(): void {
 		gameEndedAndScoreExported = false;
-		
+
 		if (gameMode === GameMode.OnlineMultiplayer && multiplayerClient) {
 			multiplayerClient.restartGame();
 		} else {
@@ -297,14 +297,14 @@ const sketch = (p: p5) => {
 			player1 = new Paddle(Board.backBorder, p.height / 2);
 			player2 = new Paddle(Board.width - Board.backBorder - Paddle.width, p.height / 2);
 			ball = new Ball();
-			
+
 			// Reinitialize AI for single player mode
 			if (gameMode === GameMode.LocalSinglePlayer && config.player2IsAI) {
 				ai2 = new AI(ball, player2, player1);
 			} else {
 				ai2 = null;
 			}
-			
+
 			gameState = GameState.StartScreen;
 		}
 	}
@@ -317,12 +317,12 @@ const sketch = (p: p5) => {
 		p.noStroke();
 		p.textSize(textSize / 2);
 		p.text('SELECT GAME MODE', Board.width / 2, Board.height / 4);
-		
+
 		p.textSize(textSize / 3);
 		p.text('1 - Single Player (vs AI)', Board.width / 2, Board.height / 2 - textSize / 3);
 		p.text('2 - Local Multiplayer', Board.width / 2, Board.height / 2);
 		p.text('3 - Online Multiplayer', Board.width / 2, Board.height / 2 + textSize / 3);
-		
+
 		p.textSize(textSize / 4);
 		p.text('Press the corresponding number', Board.width / 2, 3 * Board.height / 4);
 	}
@@ -334,7 +334,7 @@ const sketch = (p: p5) => {
 		p.noStroke();
 		p.textSize(textSize / 2);
 		p.text('ONLINE MULTIPLAYER', Board.width / 2, Board.height / 3);
-		
+
 		p.textSize(textSize / 3);
 		if (!isConnected) {
 			p.text('Connecting to server...', Board.width / 2, Board.height / 2);
@@ -353,7 +353,7 @@ const sketch = (p: p5) => {
 		p.textSize(textSize);
 		p.text('PONG', Board.width / 2, Board.height / 2 - textSize / 2);
 		p.textSize(textSize / 3);
-		
+
 		let modeText = '';
 		switch (gameMode) {
 			case GameMode.LocalSinglePlayer:
@@ -363,7 +363,7 @@ const sketch = (p: p5) => {
 				modeText = 'Local Multiplayer Mode';
 				break;
 		}
-		
+
 		p.text(modeText, Board.width / 2, Board.height / 2);
 		p.text('Press SPACE to Start!', Board.width / 2, Board.height / 2 + textSize / 3);
 	}
@@ -387,13 +387,13 @@ const sketch = (p: p5) => {
 
 		p.textFont(retroFont);
 		let count: number;
-		
+
 		if (gameMode === GameMode.OnlineMultiplayer) {
 			count = countdownValue;
 		} else {
 			const elapsed = p.millis() - countdownStartTime;
 			count = 3 - Math.floor(elapsed / 1000);
-			
+
 			if (elapsed >= countdownDuration) {
 				gameState = GameState.Playing;
 				return;
@@ -404,7 +404,7 @@ const sketch = (p: p5) => {
 		p.noStroke();
 		p.fill(255);
 		p.textSize(textSize);
-		
+
 		if (count > 0) {
 			p.text(count.toString(), Board.width / 2, Board.height / 2);
 		} else {
@@ -462,10 +462,10 @@ const sketch = (p: p5) => {
 		p.noStroke();
 		p.textSize(textSize / 8);
 		const textHeight: number = 0.95 * Board.height;
-		
+
 		let player1Name = '';
 		let player2Name = '';
-		
+
 		if (gameMode === GameMode.OnlineMultiplayer) {
 			player1Name = 'Player 1';
 			player2Name = 'Player 2';
@@ -473,7 +473,7 @@ const sketch = (p: p5) => {
 			player1Name = config.player1 || 'Player 1';
 			player2Name = config.player2 || 'Player 2';
 		}
-		
+
 		p.text(player1Name, Board.width / 4, textHeight);
 		p.text(player2Name, 3 * Board.width / 4, textHeight);
 	}
@@ -541,7 +541,7 @@ const sketch = (p: p5) => {
 		};
 
 		const dataStr = JSON.stringify(scoreData, null, 2);
-		const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+		const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
 
 		const exportFileDefaultName = 'pong_score.json';
 

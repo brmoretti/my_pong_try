@@ -30,7 +30,7 @@ export class GameRoom {
 
     this.players.add(socket);
     const playerId = this.players.size;
-    
+
     if (this.players.size === 2) {
       this.startCountdown();
     }
@@ -62,11 +62,11 @@ export class GameRoom {
   private startCountdown(): void {
     this.gameState = 'countdown';
     this.countdownValue = 3;
-    
+
     this.countdownTimer = setInterval(() => {
       this.countdownValue--;
       this.broadcastCountdown();
-      
+
       if (this.countdownValue <= 0) {
         this.startGame();
       }
@@ -81,7 +81,7 @@ export class GameRoom {
 
     this.gameState = 'playing';
     this.ball.reset(Side.Left);
-    
+
     this.gameLoop = setInterval(() => {
       this.updateGame();
     }, this.frameTime);
@@ -113,15 +113,15 @@ export class GameRoom {
   private handleCollision(): void {
     this.ball.collisionFromBottomToTop(0);
     this.ball.collisionFromTopToBottom(Board.height);
-    
+
     if (this.ball.isInFrontOf(this.player1.y + Paddle.height, this.player1.y) &&
-        this.ball.collisionFromRightToLeft(this.player1.x + Paddle.width)) {
+      this.ball.collisionFromRightToLeft(this.player1.x + Paddle.width)) {
       this.ball.ballPaddleHit(this.player1.currentSpeed);
       return;
     }
-    
+
     if (this.ball.isInFrontOf(this.player2.y + Paddle.height, this.player2.y) &&
-        this.ball.collisionFromLeftToRight(this.player2.x)) {
+      this.ball.collisionFromLeftToRight(this.player2.x)) {
       this.ball.ballPaddleHit(this.player2.currentSpeed);
       return;
     }
@@ -151,8 +151,8 @@ export class GameRoom {
       this.gameLoop = null;
     }
 
-    const winner = this.player1.currentScore > this.player2.currentScore 
-      ? this.playerNames.player1 
+    const winner = this.player1.currentScore > this.player2.currentScore
+      ? this.playerNames.player1
       : this.playerNames.player2;
 
     this.broadcastGameEnd(winner);
@@ -174,7 +174,7 @@ export class GameRoom {
     this.player1 = new Paddle(Board.backBorder, Board.height / 2);
     this.player2 = new Paddle(Board.width - Board.backBorder - Paddle.width, Board.height / 2);
     this.ball = new Ball();
-    
+
     if (this.players.size === 2) {
       this.startCountdown();
     } else {
